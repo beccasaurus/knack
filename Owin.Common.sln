@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Common", "src\Owin.Common.csproj", "{163A0E93-A512-4B2F-AF1A-301804749EDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Common.Specs", "spec\Owin.Common.Specs.csproj", "{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{163A0E93-A512-4B2F-AF1A-301804749EDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{163A0E93-A512-4B2F-AF1A-301804749EDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{163A0E93-A512-4B2F-AF1A-301804749EDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{163A0E93-A512-4B2F-AF1A-301804749EDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
