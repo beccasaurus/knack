@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Owin.Common.Specs {
 
     [TestFixture]
-    public class LintRequestSpec {
+    public class LintResponseSpec {
 
 	[Test][Ignore] public void Status_cannot_be_null_or_blank() {}
 	[Test][Ignore] public void Status_can_only_contain_ASCII_characters() {}
