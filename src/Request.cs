@@ -26,7 +26,22 @@ namespace Owin {
 	}
     }
 
+    // I think this is a cleaner approach than extension methods.
+    //
+    // Want extension methods?
+    //
+    //     myIRequest.Body;
+    //     
+    //     public static string Body(this Owin.IRequest request) {
+    //	       return request.AsRequest().Body;
+    //     }
+    //     public static string AsRequest(this Owin.IRequest request) {
+    //	       return new Owin.Request(request);
+    //     }
+    //
     public class Request : IRequest {
+
+	static readonly List<string> FormDataMediaTypes = new List<string> { "application/x-www-form-urlencoded", "multipart/form-data" };
 
 	public IRequest InnerRequest;
 
@@ -48,6 +63,26 @@ namespace Owin {
 	public int EndReadBody(IAsyncResult result){ return InnerRequest.EndReadBody(result); }
 	#endregion
 
+	// this is a crappy name ... what is this, really?  we might want to rename this property
+	public string BasePath {
+	    get { return InnerRequest.Items["owin.base_path"].ToString(); }
+	}
+
+	public string Scheme {
+	    get { return InnerRequest.Items["owin.url_scheme"].ToString(); }
+	}
+
+	public string Host {
+	    get { return StringItemOrNull("owin.server_name"); } // TODO return Host: header if definted?
+	}
+
+	public int Port {
+	    get {
+		string port = StringItemOrNull("owin.server_port");
+		return (port == null) ? 0 : int.Parse(port);
+	    }
+	}
+
 	public string Url {
 	    get {
 		string url = Scheme + "://" + Host;
@@ -61,21 +96,19 @@ namespace Owin {
 	    }
 	}
 
-	// this is a crappy name ... what is this, really?  we might want to rename this property
-	public string BasePath {
-	    get { return InnerRequest.Items["owin.base_path"].ToString(); }
+	public string ContentType {
+	    get { return HeaderOrNull("content-type"); }
 	}
 
-	public string Scheme {
-	    get { return InnerRequest.Items["owin.url_scheme"].ToString(); }
-	}
-
-	public string Host {
-	    get { return InnerRequest.Items["owin.server_name"].ToString(); } // TODO return Host: header if definted?
-	}
-
-	public int Port {
-	    get { return int.Parse(InnerRequest.Items["owin.server_port"].ToString()); }
+	public bool HasFormData {
+	    get {
+		if (FormDataMediaTypes.Contains(ContentType))
+		    return true;
+		else if (Method == "POST" && ContentType == null)
+		    return true;
+		else
+		    return false;
+	    }
 	}
 
 	/// <summary>Get the raw value of the QueryString</summary>
@@ -96,6 +129,19 @@ namespace Owin {
 		foreach (string key in queryStrings)
 		    get.Add(key, queryStrings[key]);
 		return get;
+	    }
+	}
+
+	// waiting on content type and form data ...
+	public IDictionary<string, string> POST {
+	    get {
+		IDictionary<string, string> post = new ParamsDictionary<string, string>();
+		if (! HasFormData) return post;
+
+		NameValueCollection postVariables = HttpUtility.ParseQueryString(Body);
+		foreach (string key in postVariables)
+		    post.Add(key, postVariables[key]);
+		return post;
 	    }
 	}
 
@@ -134,7 +180,12 @@ namespace Owin {
 	    return RemoveTrainingBytes(allBytes.ToArray());
 	}
 
+	// private
+
 	byte[] RemoveTrainingBytes(byte[] bytes) {
+	    if (bytes.Length == 0)
+		return bytes;
+
 	    int i = bytes.Length - 1;
 	    while (bytes[i] == 0)
 		i--;
@@ -146,6 +197,24 @@ namespace Owin {
 		Array.Copy(bytes, newBytes, i+1);
 		return newBytes;
 	    }
+	}
+
+	// If this header has multiple values, we return the last one
+	string HeaderOrNull(string key) {
+	    if (InnerRequest.Headers.ContainsKey(key)) {
+		string value = null;
+		foreach (string headerValue in InnerRequest.Headers[key])
+		    value = headerValue;
+		return value;
+	    } else
+		return null;
+	}
+
+	string StringItemOrNull(string key) {
+	    if (InnerRequest.Items.ContainsKey(key)) {
+		return InnerRequest.Items[key].ToString();
+	    } else
+		return null;
 	}
     }
 }
