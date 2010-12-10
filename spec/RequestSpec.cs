@@ -171,10 +171,18 @@ namespace Owin.Common.Specs {
 		}
 	    }
 
-	    [Test][Ignore]
-	    public void Can_read_body() {
-		//Request r = R(new Req { BodyString = "I am the posted body" });
-		//Assert.That(r.Body, Is.EqualTo("I am the posted body")); // <--- blocks until it gets the full body
+	    [Test]
+	    public void Can_get_all_bytes_from_getbody() {
+		Request r = R(new Req { BodyString = "Hello world, how goes it? ™½ <--- Non-ASCII!" });
+		byte[] bytes = r.BodyBytes;
+		Assert.That(bytes.Length, Is.EqualTo(47));
+		Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo("Hello world, how goes it? ™½ <--- Non-ASCII!"));
+	    }
+
+	    [Test]
+	    public void Can_read_body_as_string() {
+		Request r = R(new Req { BodyString = "Hello world, how goes it? ™½ <--- Non-ASCII!" });
+		Assert.That(r.Body, Is.EqualTo("Hello world, how goes it? ™½ <--- Non-ASCII!"));
 	    }
 
 	    [Test][Ignore] public void Can_get_the_raw_QueryString_from_header() {}
