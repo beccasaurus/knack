@@ -89,6 +89,7 @@ namespace Owin.Common.Specs {
 	[Test][Ignore]
 	public void Items_cannot_be_null_or_empty() {}
 
+	// What is base_path used for?  Is is the same as base_url?  It is the PATH_INFO or something below that.  Do we use this or Uri?  I think this is like the 'root'?
 	[Test]
 	public void Items_owin_base_path_cannot_be_null() {
 	    AssertItemCannotBeNull("owin.base_path");
@@ -192,6 +193,8 @@ namespace Owin.Common.Specs {
 	    request.Headers["content-type "] = new string[] { "text/html" };
 	    AssertErrorMessage("Header keys cannot contain whitespace: content-type ");
 	}
+
+	[Test][Ignore] public void Items_owin_base_url_should_be_used_for_something() {}
 
 	[Test][Ignore] public void Items_owin_version_should_be_present() {} // This is not in the spec, but I think it would be smart to include it
 
