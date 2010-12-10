@@ -111,6 +111,12 @@ namespace Owin {
 	    }
 	}
 
+	public bool IsGet    { get { return Method.ToUpper() == "GET";     }}
+	public bool IsPost   { get { return Method.ToUpper() == "POST";    }}
+	public bool IsPut    { get { return Method.ToUpper() == "PUT";     }}
+	public bool IsDelete { get { return Method.ToUpper() == "DELETE";  }}
+	public bool IsHead   { get { return Method.ToUpper() == "HEAD";    }}
+
 	/// <summary>Get the raw value of the QueryString</summary>
 	/// <remarks>
 	/// In OWIN, we include the QueryString in the Uri if it was provided.

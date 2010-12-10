@@ -266,7 +266,25 @@ namespace Owin.Common.Specs {
 
 	[Test][Ignore] public void Can_get_scheme() {}
 
-	[Test][Ignore] public void Has_predicate_properties_for_checking_request_method_type() {}
+	[Test]
+	public void Has_predicate_properties_for_checking_request_method_type() {
+	    Req r = new Req();
+
+	    r.Method = "GET";
+	    Assert.True(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
+
+	    r.Method = "POST";
+	    Assert.False(R(r).IsGet); Assert.True(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
+
+	    r.Method = "PUT";
+	    Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.True(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
+
+	    r.Method = "DELETE";
+	    Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.True(R(r).IsDelete); Assert.False(R(r).IsHead);
+
+	    r.Method = "HEAD";
+	    Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.True(R(r).IsHead);
+	}
 
 	[Test][Ignore] public void Can_get_IP() {}
 
