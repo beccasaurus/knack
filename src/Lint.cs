@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace Owin {
@@ -9,32 +12,35 @@ namespace Owin {
 
     public class Lint {
 
+	static readonly List<string> RequestItemsThatCannotBeNull  = new List<string> { "owin.base_path", "owin.server_name", "owin.server_port", "owin.request_protocol", "owin.remote_endpoint" };
+	static readonly List<string> RequestItemsThatCannotBeBlank = new List<string> { "owin.server_name", "owin.server_port", "owin.request_protocol" };
+	static readonly List<string> ValidRequestProtocols         = new List<string> { "HTTP/1.0", "HTTP/1.1" };
+	static readonly List<string> ValidUrlSchemes               = new List<string> { "http", "https" };
+	static readonly List<Type>   SupportedResponseBodyTypes    = new List<Type>   { typeof(string), typeof(byte[]), typeof(ArraySegment<byte>), typeof(FileInfo) };
+
 	public static void Validate(IRequest request) {
 	    string[] requestErrors = ErrorMessagesFor(request);
 	    if (requestErrors.Length > 0)
 		throw new LintException("Request was not valid: " + string.Join(", ", requestErrors));
 	}
 
-	static readonly List<string> RequestItemsThatCannotBeNull = new List<string> {
-	    "owin.base_path", "owin.server_name", "owin.server_port", "owin.request_protocol", "owin.remote_endpoint"
-	};
-
-	static readonly List<string> RequestItemsThatCannotBeBlank = new List<string> {
-	    "owin.server_name", "owin.server_port", "owin.request_protocol"
-	};
-
-	static readonly List<string> ValidRequestProtocols = new List<string> { "HTTP/1.0", "HTTP/1.1" };
-
-	static readonly List<string> ValidUrlSchemes = new List<string> { "http", "https" };
+	public static void Validate(IResponse response) {
+	    string[] responseErrors = ErrorMessagesFor(response);
+	    if (responseErrors.Length > 0)
+		throw new LintException("Response was not valid: " + string.Join(", ", responseErrors));
+	}
 
 	public static string[] ErrorMessagesFor(IRequest request) {
 	    List<string> errors = new List<string>();
 
+	    // Method
 	    if      (request.Method.IsNull())       errors.Add("Method cannot be null");
 	    else if (request.Method.IsWhiteSpace()) errors.Add("Method cannot be blank");
 
+	    // Uri
 	    if (request.Uri.IsNull()) errors.Add("Uri cannot be null");
 
+	    // Items
 	    if (request.Items == null)
 		errors.Add("Items cannot be null"); // TODO TEST
 	    else if (request.Items.Count == 0)
@@ -77,7 +83,64 @@ namespace Owin {
 		}
 	    }
 
-	    // Status header if (! Regex.IsMatch(request.Items["owin.server_port"].ToString(), @"^\d{3} [\w ]+$"))
+	    // Headers
+	    if (request.Headers.IsNull()) errors.Add("Headers cannot be null");
+	    else {
+		foreach (KeyValuePair<string,IEnumerable<string>> header in request.Headers)
+		    if      (! header.Key.IsLowercase()) errors.Add("Header keys must be lower-cased: "       + header.Key);
+		    else if (header.Key.Contains(":"))   errors.Add("Header keys cannot contain a colon: "    + header.Key);
+		    else if (header.Key.Contains(" "))   errors.Add("Header keys cannot contain whitespace: " + header.Key);
+	    }
+
+	    return errors.ToArray();
+	}
+
+	public static string[] ErrorMessagesFor(IResponse response) {
+	    List<string> errors = new List<string>();
+
+	    // Status
+	    if      (response.Status.IsNull())           errors.Add("Status cannot be null");
+	    else if (response.Status.IsWhiteSpace())     errors.Add("Status cannot be blank");
+	    else if (response.Status.ContainsNonASCII()) errors.Add("Status cannot contain non-ASCII characters: " + response.Status);
+	    else if (response.Status.Contains("\n"))     errors.Add("Status cannot include a newline: "            + response.Status);
+	    else if (! Regex.IsMatch(response.Status, @"^\d{3} [\w ]+$"))
+		    errors.Add("Status must include integer status followed by a space and a reason phrase: " + response.Status);
+
+	    // Headers
+	    if (response.Headers.IsNull()) errors.Add("Headers cannot be null");
+	    else {
+		foreach (KeyValuePair<string, IEnumerable<string>> header in response.Headers) {
+		    string key = header.Key;
+		    if      (key.Contains(" "))      errors.Add("Header keys cannot contain whitespace: "           + key);
+		    else if (key.Contains("."))      errors.Add("Header keys cannot contain periods: "              + key);
+		    else if (key.Contains("\n"))     errors.Add("Header keys cannot contain newlines: "             + key);
+		    else if (key.ContainsNonASCII()) errors.Add("Header keys cannot contain non-ASCII characters: " + key);
+
+		    foreach (string value in header.Value)
+			if      (value.Contains("\n"))     errors.Add("Header values cannot contain newlines: "             + key + ": " + value);
+			else if (value.ContainsNonASCII()) errors.Add("Header values cannot contain non-ASCII characters: " + key + ": " + value);
+		}
+	    }
+
+	    // Body
+	    foreach (object bodyPart in response.GetBody())
+		if (! SupportedResponseBodyTypes.Contains(bodyPart.GetType()))
+		    errors.Add("GetBody() has unsupported type: " + bodyPart.GetType().Name + ".  Supported types: string, byte[], ArraySegment<byte>, FileInfo");
+	    /*
+	    foreach (object bodyPart in response.GetBody()) {
+		bool supportedType = false;
+		//if (! SupportedResponseBodyTypes.Contains(bodyPart.GetType()))
+		//		    errors.Add("GetBody() has unsupported type: " + bodyPart.GetType().Name + ".  Supported types: string, byte[], ArraySegment<byte>, FileInfo");
+		foreach (Type type in SupportedResponseBodyTypes) {
+		    if (bodyPart is type) {
+			supportedType = true;
+			break;
+		    }
+		}
+		if (! supportedType)
+		    errors.Add("GetBody() has unsupported type: " + bodyPart.GetType().Name + ".  Supported types: string, byte[], ArraySegment<byte>, FileInfo");
+	    }
+	    */
 
 	    return errors.ToArray();
 	}
@@ -115,6 +178,12 @@ namespace Owin {
 	}
 	public static bool IsNotAnInteger(this object value) {
 	    return ! value.IsAnInteger();
+	}
+	public static bool ContainsNonASCII(this string value) {
+	    return value != Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(value));
+	}
+	public static bool IsLowercase(this string value) {
+	    return value == value.ToLower();
 	}
     }
 }

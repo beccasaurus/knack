@@ -20,6 +20,7 @@ namespace Owin.Common.Specs {
 	    Items["owin.request_protocol"] = "HTTP/1.1";
 	    Items["owin.url_scheme"]       = "http";
 	    Items["owin.remote_endpoint"]  = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
+	    Headers = new Dictionary<string, IEnumerable<string>>();
 	}
 	public string Method { get; set; }
 	public string Uri { get; set; }
@@ -84,6 +85,9 @@ namespace Owin.Common.Specs {
 	    request = new Req { Uri = "" };
 	    AssertValid();
 	}
+
+	[Test][Ignore]
+	public void Items_cannot_be_null_or_empty() {}
 
 	[Test]
 	public void Items_owin_base_path_cannot_be_null() {
@@ -161,6 +165,34 @@ namespace Owin.Common.Specs {
 	    AssertValid();
 	}
 
+	[Test]
+	public void Headers_cannot_be_null() {
+	    request = new Req { Headers = null };
+	    AssertErrorMessage("Headers cannot be null");
+	}
+
+	[Test]
+	public void Headers_keys_must_be_lowercase() {
+	    request.Headers["Content-Type"] = new string[] { "text/html" };
+	    AssertErrorMessage("Header keys must be lower-cased: Content-Type");
+
+	    request = new Req();
+	    request.Headers["content-type"] = new string[] { "text/html" };
+	    AssertValid();
+	}
+
+	[Test]
+	public void Headers_keys_cannot_have_colon() {
+	    request.Headers["content-type:"] = new string[] { "text/html" };
+	    AssertErrorMessage("Header keys cannot contain a colon: content-type:");
+	}
+
+	[Test]
+	public void Headers_keys_cannot_have_whitespace() {
+	    request.Headers["content-type "] = new string[] { "text/html" };
+	    AssertErrorMessage("Header keys cannot contain whitespace: content-type ");
+	}
+
 	[Test][Ignore] public void Items_owin_version_should_be_present() {} // This is not in the spec, but I think it would be smart to include it
 
 	// Helper / Assertion methods
@@ -186,7 +218,7 @@ namespace Owin.Common.Specs {
 
 	void AssertValid() {
 	    __validateRequest();
-	    Assert.That(ErrorMessages.Length, Is.EqualTo(0));
+	    Assert.That(new List<string>(ErrorMessages), Is.Empty);
 	}
 
 	void AssertErrorMessage(string message) {
