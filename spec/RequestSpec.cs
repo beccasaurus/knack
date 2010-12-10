@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Text;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Owin;
@@ -10,6 +11,8 @@ namespace Owin.Common.Specs {
     // *Simple* struct-like IRequest implementation for RequestSpec
     // we will probably take this class and use it or parts of it for Owin.Request or, if we make it, Owin.Handlers.Request (?)
     public class Req : IRequest {
+	public delegate void DoWork();
+
 	public Req() {
 	    // Make the Request valid
 	    Method = "GET";
@@ -22,13 +25,40 @@ namespace Owin.Common.Specs {
 	    Items["owin.url_scheme"]       = "http";
 	    Items["owin.remote_endpoint"]  = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
 	    Headers = new Dictionary<string, IEnumerable<string>>();
+	    ActuallyReadTheBody = new ReadTheBodyDelegate(ReadTheBody);
 	}
 	public string Method { get; set; }
 	public string Uri { get; set; }
 	public IDictionary<string, IEnumerable<string>> Headers { get; set; }
 	public IDictionary<string, object> Items { get; set; }
-	public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state){ return null; }
-	public int EndReadBody(IAsyncResult result){ return 0; }
+
+	public string BodyString { get; set; }
+	public byte[] BodyBytes {
+	    get { return Encoding.UTF8.GetBytes(BodyString); }
+	}
+
+	public delegate int ReadTheBodyDelegate(byte[] buffer, int offset, int count);
+	ReadTheBodyDelegate ActuallyReadTheBody { get; set; }
+	int ReadTheBody(byte[] buffer, int offset, int count) {
+	    int bytesRead = 0;
+	    for (int i = 0; i < count; i++) {
+		int index = offset + i;
+		if (index >= BodyBytes.Length)
+		    break; // the BodyBytes doesn't have this index
+		else {
+		    bytesRead++;
+		    buffer[i] = BodyBytes[index];
+		}
+	    }
+	    return bytesRead;
+	}
+
+	public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+	    return ActuallyReadTheBody.BeginInvoke(buffer, offset, count, callback, state);
+	}
+	public int EndReadBody(IAsyncResult result) {
+	    return ActuallyReadTheBody.EndInvoke(result);
+	}
     }
 
     [TestFixture]
@@ -108,9 +138,51 @@ namespace Owin.Common.Specs {
 		Assert.That(R(new Req { Uri = "/foo?a=5&hi=there" }).GET["hi"], Is.EqualTo("there"));
 	    }
 
+	    // public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state){ return null; }
+	    // public int EndReadBody(IAsyncResult result){ return 0; }
+	    [Test]
+	    public void Can_read_body_manually() {
+		IRequest r = new Req { BodyString = "I am the posted body" };
+		
+		// grab some bytes ...
+		byte[] bytes        = new byte[5];
+		IAsyncResult result = r.BeginReadBody(bytes, 0, 5, null, null); // no callback or state, we want to do this synchronously
+		int bytesRead       = r.EndReadBody(result); // this should block!  per: http://msdn.microsoft.com/en-us/library/ms228967(v=VS.80).aspx
+		Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo("I am "));
+
+		// grab the rest
+		byte[] moreBytes = new byte[1000];
+		result           = r.BeginReadBody(moreBytes, 5, 1000, null, null); // no callback or state, we want to do this synchronously
+		bytesRead        = r.EndReadBody(result); // this should block!  per: http://msdn.microsoft.com/en-us/library/ms228967(v=VS.80).aspx
+		Assert.That(Encoding.UTF8.GetString(WithoutTrailingBytes(moreBytes)), Is.EqualTo("the posted body"));
+	    }
+
+	    byte[] WithoutTrailingBytes(byte[] bytes) {
+		int i = bytes.Length - 1;
+		while (bytes[i] == 0)
+		    i--;
+
+		if (i == 0)
+		    return bytes;
+		else {
+		    byte[] newBytes = new byte[i+1];
+		    Array.Copy(bytes, newBytes, i+1);
+		    return newBytes;
+		}
+	    }
+
+	    [Test][Ignore]
+	    public void Can_read_body() {
+		//Request r = R(new Req { BodyString = "I am the posted body" });
+		//Assert.That(r.Body, Is.EqualTo("I am the posted body")); // <--- blocks until it gets the full body
+	    }
+
 	    [Test][Ignore] public void Can_get_the_raw_QueryString_from_header() {}
+
 	    [Test][Ignore] public void Can_get_the_post_body() {}
+
 	    [Test][Ignore] public void Can_get_the_value_of_a_POST_variable() {}
+
 	    [Test][Ignore] public void Can_get_Params_from_either_a_QueryString_or_POST_variable() {}
 	    [Test][Ignore] public void Can_get_referer_or_referrer() {}
 	    [Test][Ignore] public void Can_get_host() {}
