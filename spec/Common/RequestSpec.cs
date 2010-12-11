@@ -12,296 +12,313 @@ namespace Owin.Common.Specs {
     // *Simple* struct-like IRequest implementation for RequestSpec
     // we will probably take this class and use it or parts of it for Owin.Request or, if we make it, Owin.Handlers.Request (?)
     public class Req : IRequest {
-	public delegate void DoWork();
+        public delegate void DoWork();
 
-	public Req() {
-	    // Make the Request valid
-	    Method = "GET";
-	    Uri    = "";
-	    Items  = new Dictionary<string, object>();
-	    Items["owin.base_path"]        = "";
-	    Items["owin.server_name"]      = "localhost";
-	    Items["owin.server_port"]      = 80;
-	    Items["owin.request_protocol"] = "HTTP/1.1";
-	    Items["owin.url_scheme"]       = "http";
-	    Items["owin.remote_endpoint"]  = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
-	    Headers = new Dictionary<string, IEnumerable<string>>();
-	    ActuallyReadTheBody = new ReadTheBodyDelegate(ReadTheBody);
-	}
-	public string Method { get; set; }
-	public string Uri { get; set; }
-	public IDictionary<string, IEnumerable<string>> Headers { get; set; }
-	public IDictionary<string, object> Items { get; set; }
+        public Req() {
+            // Make the Request valid
+            Method = "GET";
+            Uri = "";
+            Items = new Dictionary<string, object>();
+            Items["owin.base_path"] = "";
+            Items["owin.server_name"] = "localhost";
+            Items["owin.server_port"] = 80;
+            Items["owin.request_protocol"] = "HTTP/1.1";
+            Items["owin.url_scheme"] = "http";
+            Items["owin.remote_endpoint"] = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
+            Headers = new Dictionary<string, IEnumerable<string>>();
+            ActuallyReadTheBody = new ReadTheBodyDelegate(ReadTheBody);
+        }
+        public string Method { get; set; }
+        public string Uri { get; set; }
+        public IDictionary<string, IEnumerable<string>> Headers { get; set; }
+        public IDictionary<string, object> Items { get; set; }
 
-	public string BodyString { get; set; }
-	public byte[] BodyBytes {
-	    get { return Encoding.UTF8.GetBytes(BodyString); }
-	}
+        public string BodyString { get; set; }
+        public byte[] BodyBytes {
+            get { return Encoding.UTF8.GetBytes(BodyString); }
+        }
 
-	public delegate int ReadTheBodyDelegate(byte[] buffer, int offset, int count);
-	ReadTheBodyDelegate ActuallyReadTheBody { get; set; }
-	int ReadTheBody(byte[] buffer, int offset, int count) {
-	    int bytesRead = 0;
-	    for (int i = 0; i < count; i++) {
-		int index = offset + i;
-		if (index >= BodyBytes.Length)
-		    break; // the BodyBytes doesn't have this index
-		else {
-		    bytesRead++;
-		    buffer[i] = BodyBytes[index];
-		}
-	    }
-	    return bytesRead;
-	}
+        public delegate int ReadTheBodyDelegate(byte[] buffer, int offset, int count);
+        ReadTheBodyDelegate ActuallyReadTheBody { get; set; }
+        int ReadTheBody(byte[] buffer, int offset, int count) {
+            int bytesRead = 0;
+            for (int i = 0; i < count; i++) {
+                int index = offset + i;
+                if (index >= BodyBytes.Length)
+                    break; // the BodyBytes doesn't have this index
+                else {
+                    bytesRead++;
+                    buffer[i] = BodyBytes[index];
+                }
+            }
+            return bytesRead;
+        }
 
-	public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
-	    return ActuallyReadTheBody.BeginInvoke(buffer, offset, count, callback, state);
-	}
-	public int EndReadBody(IAsyncResult result) {
-	    return ActuallyReadTheBody.EndInvoke(result);
-	}
+        public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+            return ActuallyReadTheBody.BeginInvoke(buffer, offset, count, callback, state);
+        }
+        public int EndReadBody(IAsyncResult result) {
+            return ActuallyReadTheBody.EndInvoke(result);
+        }
     }
 
     [TestFixture]
     public class RequestSpec {
 
-	Request req;
+        Request req;
 
-	// Helper method for getting a new Owin.Request, given an IRequest to instantiate it with
-	Request R(IRequest innerRequest) {
-	    return new Request(innerRequest);
-	}
-	
-	[SetUp] public void Before() { req = null; }
+        // Helper method for getting a new Owin.Request, given an IRequest to instantiate it with
+        Request R(IRequest innerRequest) {
+            return new Request(innerRequest);
+        }
 
-	[Test]
-	public void Can_be_instantiated_with_an_IRequest() {
-	    Assert.That(R(new Req { Method = "GET"  }).Method, Is.EqualTo("GET"));
-	    Assert.That(R(new Req { Method = "POST" }).Method, Is.EqualTo("POST"));
-	    Assert.That(R(new Req { Uri    = "/foo" }).Uri,    Is.EqualTo("/foo"));
-	    Assert.That(R(new Req { Uri    = "/bar" }).Uri,    Is.EqualTo("/bar"));
-	}
+        [SetUp]
+        public void Before() { req = null; }
 
-	[Test]
-	public void Can_get_the_full_Url() {
-	    Req request = new Req { Uri = "/foo/bar?hi=there" };
-	    request.Items["owin.base_path"]   = "/my/app";
-	    request.Items["owin.server_name"] = "localhost";
-	    request.Items["owin.server_port"] = 80;
-	    request.Items["owin.url_scheme"]  = "http";
-	    Assert.That(R(request).Url, Is.EqualTo("http://localhost/my/app/foo/bar?hi=there"));
+        [Test]
+        public void Can_be_instantiated_with_an_IRequest() {
+            Assert.That(R(new Req { Method = "GET" }).Method, Is.EqualTo("GET"));
+            Assert.That(R(new Req { Method = "POST" }).Method, Is.EqualTo("POST"));
+            Assert.That(R(new Req { Uri = "/foo" }).Uri, Is.EqualTo("/foo"));
+            Assert.That(R(new Req { Uri = "/bar" }).Uri, Is.EqualTo("/bar"));
+        }
 
-	    request.Items["owin.base_path"]   = "/my/root";
-	    Assert.That(R(request).Url, Is.EqualTo("http://localhost/my/root/foo/bar?hi=there"));
+        [Test]
+        public void Can_get_the_full_Url() {
+            Req request = new Req { Uri = "/foo/bar?hi=there" };
+            request.Items["owin.base_path"] = "/my/app";
+            request.Items["owin.server_name"] = "localhost";
+            request.Items["owin.server_port"] = 80;
+            request.Items["owin.url_scheme"] = "http";
+            Assert.That(R(request).Url, Is.EqualTo("http://localhost/my/app/foo/bar?hi=there"));
 
-	    request.Uri = "/neat";
-	    Assert.That(R(request).Url, Is.EqualTo("http://localhost/my/root/neat"));
+            request.Items["owin.base_path"] = "/my/root";
+            Assert.That(R(request).Url, Is.EqualTo("http://localhost/my/root/foo/bar?hi=there"));
 
-	    request.Items["owin.server_name"] = "code.com";
-	    Assert.That(R(request).Url, Is.EqualTo("http://code.com/my/root/neat"));
+            request.Uri = "/neat";
+            Assert.That(R(request).Url, Is.EqualTo("http://localhost/my/root/neat"));
 
-	    request.Items["owin.url_scheme"]  = "https";
-	    request.Items["owin.server_port"] = 443;
-	    Assert.That(R(request).Url, Is.EqualTo("https://code.com/my/root/neat"));
+            request.Items["owin.server_name"] = "code.com";
+            Assert.That(R(request).Url, Is.EqualTo("http://code.com/my/root/neat"));
 
-	    request.Items["owin.server_port"] = 123;
-	    Assert.That(R(request).Url, Is.EqualTo("https://code.com:123/my/root/neat"));
+            request.Items["owin.url_scheme"] = "https";
+            request.Items["owin.server_port"] = 443;
+            Assert.That(R(request).Url, Is.EqualTo("https://code.com/my/root/neat"));
 
-	    request.Items["owin.url_scheme"]  = "http";
-	    Assert.That(R(request).Url, Is.EqualTo("http://code.com:123/my/root/neat"));
-	}
-	
-	[Test]
-	public void Can_get_the_raw_QueryString_from_Uri() {
-	    Assert.That(R(new Req { Uri = "/"                 }).QueryString, Is.EqualTo(""));
-	    Assert.That(R(new Req { Uri = "/foo"              }).QueryString, Is.EqualTo(""));
-	    Assert.That(R(new Req { Uri = "/foo?a=5"          }).QueryString, Is.EqualTo("a=5"));
-	    Assert.That(R(new Req { Uri = "/foo?a=5&hi=there" }).QueryString, Is.EqualTo("a=5&hi=there"));
-	    Assert.That(R(new Req { Uri = "/?a=5&hi=there"    }).QueryString, Is.EqualTo("a=5&hi=there"));
-	    Assert.That(R(new Req { Uri = "?a=5&hi=there"     }).QueryString, Is.EqualTo("a=5&hi=there"));
-	}
+            request.Items["owin.server_port"] = 123;
+            Assert.That(R(request).Url, Is.EqualTo("https://code.com:123/my/root/neat"));
 
-	[Test]
-	public void Can_get_the_value_of_a_QueryString() {
-	    Assert.That(R(new Req { Uri = "/"                 }).GET, Is.Empty);
-	    Assert.That(R(new Req { Uri = "/foo"              }).GET, Is.Empty);
+            request.Items["owin.url_scheme"] = "http";
+            Assert.That(R(request).Url, Is.EqualTo("http://code.com:123/my/root/neat"));
+        }
 
-	    Assert.That(R(new Req { Uri = "/foo?a=5"          }).GET, Is.Not.Empty);
-	    Assert.That(R(new Req { Uri = "/foo?a=5"          }).GET["a"],  Is.EqualTo("5"));
-	    Assert.That(R(new Req { Uri = "/foo?a=5"          }).GET["a"],  Is.EqualTo("5"));
-	    Assert.That(R(new Req { Uri = "/foo?a=5"          }).GET["hi"], Is.Null);
+        [Test]
+        public void Can_get_the_raw_QueryString_from_Uri() {
+            Assert.That(R(new Req { Uri = "/" }).QueryString, Is.EqualTo(""));
+            Assert.That(R(new Req { Uri = "/foo" }).QueryString, Is.EqualTo(""));
+            Assert.That(R(new Req { Uri = "/foo?a=5" }).QueryString, Is.EqualTo("a=5"));
+            Assert.That(R(new Req { Uri = "/foo?a=5&hi=there" }).QueryString, Is.EqualTo("a=5&hi=there"));
+            Assert.That(R(new Req { Uri = "/?a=5&hi=there" }).QueryString, Is.EqualTo("a=5&hi=there"));
+            Assert.That(R(new Req { Uri = "?a=5&hi=there" }).QueryString, Is.EqualTo("a=5&hi=there"));
+        }
 
-	    Assert.That(R(new Req { Uri = "/foo?a=5&hi=there" }).GET["a"],  Is.EqualTo("5"));
-	    Assert.That(R(new Req { Uri = "/foo?a=5&hi=there" }).GET["hi"], Is.EqualTo("there"));
-	}
+        [Test]
+        public void Can_get_the_value_of_a_QueryString() {
+            Assert.That(R(new Req { Uri = "/" }).GET, Is.Empty);
+            Assert.That(R(new Req { Uri = "/foo" }).GET, Is.Empty);
 
-	[Test][Ignore] public void Can_get_the_raw_QueryString_from_header() {}
+            Assert.That(R(new Req { Uri = "/foo?a=5" }).GET, Is.Not.Empty);
+            Assert.That(R(new Req { Uri = "/foo?a=5" }).GET["a"], Is.EqualTo("5"));
+            Assert.That(R(new Req { Uri = "/foo?a=5" }).GET["a"], Is.EqualTo("5"));
+            Assert.That(R(new Req { Uri = "/foo?a=5" }).GET["hi"], Is.Null);
 
-	// public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state){ return null; }
-	// public int EndReadBody(IAsyncResult result){ return 0; }
-	[Test]
-	public void Can_read_body_manually() {
-	    IRequest r = new Req { BodyString = "I am the posted body" };
-	    
-	    // grab some bytes ...
-	    byte[] bytes        = new byte[5];
-	    IAsyncResult result = r.BeginReadBody(bytes, 0, 5, null, null); // no callback or state, we want to do this synchronously
-	    int bytesRead       = r.EndReadBody(result); // this should block!  per: http://msdn.microsoft.com/en-us/library/ms228967(v=VS.80).aspx
-	    Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo("I am "));
+            Assert.That(R(new Req { Uri = "/foo?a=5&hi=there" }).GET["a"], Is.EqualTo("5"));
+            Assert.That(R(new Req { Uri = "/foo?a=5&hi=there" }).GET["hi"], Is.EqualTo("there"));
+        }
 
-	    // grab the rest
-	    byte[] moreBytes = new byte[1000];
-	    result           = r.BeginReadBody(moreBytes, 5, 1000, null, null); // no callback or state, we want to do this synchronously
-	    bytesRead        = r.EndReadBody(result); // this should block!  per: http://msdn.microsoft.com/en-us/library/ms228967(v=VS.80).aspx
-	    Assert.That(Encoding.UTF8.GetString(WithoutTrailingBytes(moreBytes)), Is.EqualTo("the posted body"));
-	}
+        [Test]
+        [Ignore]
+        public void Can_get_the_raw_QueryString_from_header() { }
 
-	[Test]
-	public void Can_get_all_bytes_from_getbody() {
-	    Request r = R(new Req { BodyString = "Hello world, how goes it? ™½ <--- Non-ASCII!" });
-	    byte[] bytes = r.BodyBytes;
-	    Assert.That(bytes.Length, Is.EqualTo(47));
-	    Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo("Hello world, how goes it? ™½ <--- Non-ASCII!"));
-	}
+        // public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state){ return null; }
+        // public int EndReadBody(IAsyncResult result){ return 0; }
+        [Test]
+        public void Can_read_body_manually() {
+            IRequest r = new Req { BodyString = "I am the posted body" };
 
-	[Test]
-	public void Can_read_body_as_string() {
-	    Request r = R(new Req { BodyString = "Hello world, how goes it? ™½ <--- Non-ASCII!" });
-	    Assert.That(r.Body, Is.EqualTo("Hello world, how goes it? ™½ <--- Non-ASCII!"));
-	}
+            // grab some bytes ...
+            byte[] bytes = new byte[5];
+            IAsyncResult result = r.BeginReadBody(bytes, 0, 5, null, null); // no callback or state, we want to do this synchronously
+            int bytesRead = r.EndReadBody(result); // this should block!  per: http://msdn.microsoft.com/en-us/library/ms228967(v=VS.80).aspx
+            Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo("I am "));
 
-	[Test]
-	public void Can_get_the_value_of_a_POST_variable() {
-	    Req r = new Req();
-	    r.Headers["content-type"] = new string[] { "application/x-www-form-urlencoded" };
+            // grab the rest
+            byte[] moreBytes = new byte[1000];
+            result = r.BeginReadBody(moreBytes, 5, 1000, null, null); // no callback or state, we want to do this synchronously
+            bytesRead = r.EndReadBody(result); // this should block!  per: http://msdn.microsoft.com/en-us/library/ms228967(v=VS.80).aspx
+            Assert.That(Encoding.UTF8.GetString(WithoutTrailingBytes(moreBytes)), Is.EqualTo("the posted body"));
+        }
 
-	    r.BodyString = "";
-	    Assert.That(R(r).POST, Is.Empty);
+        [Test]
+        public void Can_get_all_bytes_from_getbody() {
+            Request r = R(new Req { BodyString = "Hello world, how goes it? ™½ <--- Non-ASCII!" });
+            byte[] bytes = r.BodyBytes;
+            Assert.That(bytes.Length, Is.EqualTo(47));
+            Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo("Hello world, how goes it? ™½ <--- Non-ASCII!"));
+        }
 
-	    r.BodyString = "a=5";
-	    Assert.That(R(r).POST, Is.Not.Empty);
-	    Assert.That(R(r).POST["a"],  Is.EqualTo("5"));
-	    Assert.That(R(r).POST["a"],  Is.EqualTo("5"));
-	    Assert.That(R(r).POST["hi"], Is.Null);
+        [Test]
+        public void Can_read_body_as_string() {
+            Request r = R(new Req { BodyString = "Hello world, how goes it? ™½ <--- Non-ASCII!" });
+            Assert.That(r.Body, Is.EqualTo("Hello world, how goes it? ™½ <--- Non-ASCII!"));
+        }
 
-	    r.BodyString = "a=5&hi=there";
-	    Assert.That(R(r).POST["a"],  Is.EqualTo("5"));
-	    Assert.That(R(r).POST["hi"], Is.EqualTo("there"));
-	}
+        [Test]
+        public void Can_get_the_value_of_a_POST_variable() {
+            Req r = new Req();
+            r.Headers["content-type"] = new string[] { "application/x-www-form-urlencoded" };
 
-	[Test]
-	public void Can_get_the_request_content_type() {
-	    Req req = new Req();
-	    req.Headers["content-type"] = new string[] { "text/html" };
-	    Assert.That(R(req).ContentType, Is.EqualTo("text/html"));
+            r.BodyString = "";
+            Assert.That(R(r).POST, Is.Empty);
 
-	    req.Headers["content-type"] = new string[] { "text/plain" };
-	    Assert.That(R(req).ContentType, Is.EqualTo("text/plain"));
+            r.BodyString = "a=5";
+            Assert.That(R(r).POST, Is.Not.Empty);
+            Assert.That(R(r).POST["a"], Is.EqualTo("5"));
+            Assert.That(R(r).POST["a"], Is.EqualTo("5"));
+            Assert.That(R(r).POST["hi"], Is.Null);
 
-	    req.Headers.Remove("content-type");
-	    Assert.Null(R(req).ContentType);
-	}
+            r.BodyString = "a=5&hi=there";
+            Assert.That(R(r).POST["a"], Is.EqualTo("5"));
+            Assert.That(R(r).POST["hi"], Is.EqualTo("there"));
+        }
 
-	[Test]
-	public void Can_get_whether_or_not_the_request_has_form_data() {
-	    Req req = new Req { Method = "GET" };
+        [Test]
+        public void Can_get_the_request_content_type() {
+            Req req = new Req();
+            req.Headers["content-type"] = new string[] { "text/html" };
+            Assert.That(R(req).ContentType, Is.EqualTo("text/html"));
 
-	    // if application/x-www-form-urlencoded
-	    req.Headers["content-type"] = new string[] { "application/x-www-form-urlencoded" };
-	    Assert.True(R(req).HasFormData);
+            req.Headers["content-type"] = new string[] { "text/plain" };
+            Assert.That(R(req).ContentType, Is.EqualTo("text/plain"));
 
-	    // if multipart/form-data
-	    req.Headers["content-type"] = new string[] { "multipart/form-data" };
-	    Assert.True(R(req).HasFormData);
-	    
-	    // if POST and no ContentType provided
-	    req.Method = "POST";
-	    req.Headers.Remove("content-type");
-	    Assert.True(R(req).HasFormData);
-	    
-	    // NO if a GET with no ContentType
-	    req.Method = "GET";
-	    Assert.False(R(req).HasFormData);
-	    
-	    // NO if a POST with a different Contenttype
-	    req.Method = "POST";
-	    req.Headers["content-type"] = new string[] { "text/html" };
-	    Assert.False(R(req).HasFormData);
-	}
+            req.Headers.Remove("content-type");
+            Assert.Null(R(req).ContentType);
+        }
 
-	[Test][Ignore] public void Can_get_Params_from_either_a_QueryString_or_POST_variable() {}
-	[Test][Ignore] public void Can_get_referer_or_referrer() {}
+        [Test]
+        public void Can_get_whether_or_not_the_request_has_form_data() {
+            Req req = new Req { Method = "GET" };
 
-	[Test]
-	public void Can_get_host() {
-	    Req r = new Req();
+            // if application/x-www-form-urlencoded
+            req.Headers["content-type"] = new string[] { "application/x-www-form-urlencoded" };
+            Assert.True(R(req).HasFormData);
 
-	    r.Items.Remove("owin.server_name");
-	    Assert.Null(R(r).Host);
+            // if multipart/form-data
+            req.Headers["content-type"] = new string[] { "multipart/form-data" };
+            Assert.True(R(req).HasFormData);
 
-	    r.Items["owin.server_name"] = "localhost";
-	    Assert.That(R(r).Host, Is.EqualTo("localhost"));
+            // if POST and no ContentType provided
+            req.Method = "POST";
+            req.Headers.Remove("content-type");
+            Assert.True(R(req).HasFormData);
 
-	    r.Items["owin.server_name"] = "google.com";
-	    Assert.That(R(r).Host, Is.EqualTo("google.com"));
-	}
+            // NO if a GET with no ContentType
+            req.Method = "GET";
+            Assert.False(R(req).HasFormData);
 
-	[Test][Ignore] public void Can_get_host_from_header() {}
+            // NO if a POST with a different Contenttype
+            req.Method = "POST";
+            req.Headers["content-type"] = new string[] { "text/html" };
+            Assert.False(R(req).HasFormData);
+        }
 
-	[Test]
-	public void Can_get_port() {
-	    Req r = new Req();
+        [Test]
+        [Ignore]
+        public void Can_get_Params_from_either_a_QueryString_or_POST_variable() { }
+        [Test]
+        [Ignore]
+        public void Can_get_referer_or_referrer() { }
 
-	    r.Items.Remove("owin.server_port");
-	    Assert.That(R(r).Port, Is.EqualTo(0));
+        [Test]
+        public void Can_get_host() {
+            Req r = new Req();
 
-	    r.Items["owin.server_port"] = "8080";
-	    Assert.That(R(r).Port, Is.EqualTo(8080));
+            r.Items.Remove("owin.server_name");
+            Assert.Null(R(r).Host);
 
-	    r.Items["owin.server_port"] = 1234;
-	    Assert.That(R(r).Port, Is.EqualTo(1234));
-	}
+            r.Items["owin.server_name"] = "localhost";
+            Assert.That(R(r).Host, Is.EqualTo("localhost"));
 
-	[Test][Ignore] public void Can_get_port_from_header() {}
+            r.Items["owin.server_name"] = "google.com";
+            Assert.That(R(r).Host, Is.EqualTo("google.com"));
+        }
 
-	[Test][Ignore] public void Can_get_scheme() {}
+        [Test]
+        [Ignore]
+        public void Can_get_host_from_header() { }
 
-	[Test]
-	public void Has_predicate_properties_for_checking_request_method_type() {
-	    Req r = new Req();
+        [Test]
+        public void Can_get_port() {
+            Req r = new Req();
 
-	    r.Method = "GET";
-	    Assert.True(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
+            r.Items.Remove("owin.server_port");
+            Assert.That(R(r).Port, Is.EqualTo(0));
 
-	    r.Method = "POST";
-	    Assert.False(R(r).IsGet); Assert.True(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
+            r.Items["owin.server_port"] = "8080";
+            Assert.That(R(r).Port, Is.EqualTo(8080));
 
-	    r.Method = "PUT";
-	    Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.True(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
+            r.Items["owin.server_port"] = 1234;
+            Assert.That(R(r).Port, Is.EqualTo(1234));
+        }
 
-	    r.Method = "DELETE";
-	    Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.True(R(r).IsDelete); Assert.False(R(r).IsHead);
+        [Test]
+        [Ignore]
+        public void Can_get_port_from_header() { }
 
-	    r.Method = "HEAD";
-	    Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.True(R(r).IsHead);
-	}
+        [Test]
+        [Ignore]
+        public void Can_get_scheme() { }
 
-	[Test][Ignore] public void Can_get_IP() {}
+        [Test]
+        public void Has_predicate_properties_for_checking_request_method_type() {
+            Req r = new Req();
 
-	[Test][Ignore] public void Can_be_instantiated_with_no_arguments_to_build_a_new_request() {} // <---- this is what we really need now ... Handlers.Request?
+            r.Method = "GET";
+            Assert.True(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
 
-	byte[] WithoutTrailingBytes(byte[] bytes) {
-	    int i = bytes.Length - 1;
-	    while (bytes[i] == 0)
-		i--;
+            r.Method = "POST";
+            Assert.False(R(r).IsGet); Assert.True(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
 
-	    if (i == 0)
-		return bytes;
-	    else {
-		byte[] newBytes = new byte[i+1];
-		Array.Copy(bytes, newBytes, i+1);
-		return newBytes;
-	    }
-	}
+            r.Method = "PUT";
+            Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.True(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.False(R(r).IsHead);
+
+            r.Method = "DELETE";
+            Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.True(R(r).IsDelete); Assert.False(R(r).IsHead);
+
+            r.Method = "HEAD";
+            Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.True(R(r).IsHead);
+        }
+
+        [Test]
+        [Ignore]
+        public void Can_get_IP() { }
+
+        [Test]
+        [Ignore]
+        public void Can_be_instantiated_with_no_arguments_to_build_a_new_request() { } // <---- this is what we really need now ... Handlers.Request?
+
+        byte[] WithoutTrailingBytes(byte[] bytes) {
+            int i = bytes.Length - 1;
+            while (bytes[i] == 0)
+                i--;
+
+            if (i == 0)
+                return bytes;
+            else {
+                byte[] newBytes = new byte[i + 1];
+                Array.Copy(bytes, newBytes, i + 1);
+                return newBytes;
+            }
+        }
     }
 }
