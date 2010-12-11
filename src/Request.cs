@@ -154,7 +154,7 @@ namespace Owin {
 
 	// blocks while it gets the full body
 	public string Body {
-	    get { return Encoding.UTF8.GetString(BodyBytes); }
+	    get { return Encoding.UTF8.GetString(BodyBytes); } // TODO should be able to change the encoding used (?)
 	}
 
 	// blocks while it gets the full body
