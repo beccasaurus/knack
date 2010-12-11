@@ -45,7 +45,7 @@ namespace Owin {
 #endregion
 
 #region Method
-	public string Method { get; set; }
+	public new string Method { get; set; }
 
 	public RequestWriter SetMethod(string method) {
 	    Method = method;
@@ -54,7 +54,7 @@ namespace Owin {
 #endregion
 
 #region Uri
-	public string Uri { get; set; }
+	public new string Uri { get; set; }
 
 	public RequestWriter SetUri(string uri) {
 	    Uri = uri;
@@ -63,7 +63,7 @@ namespace Owin {
 #endregion
 
 #region Headers
-	public IDictionary<string, IEnumerable<string>> Headers { get; set; }
+	public new IDictionary<string, IEnumerable<string>> Headers { get; set; }
 
 	/// <summary>Set header with a string, overriding any other values this header may have</summary>
 	public RequestWriter SetHeader(string key, string value) {
@@ -107,7 +107,7 @@ namespace Owin {
 #endregion
 
 #region Items
-	public IDictionary<string, object> Items { get; set; }
+	public new IDictionary<string, object> Items { get; set; }
 
 	public RequestWriter SetItem(string key, object value) {
 	    Items[key] = value;
@@ -164,10 +164,10 @@ namespace Owin {
 	    return bytesRead;
 	}
 
-	public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+	public override IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
 	    return ActuallyReadTheBody.BeginInvoke(buffer, offset, count, callback, state);
 	}
-	public int EndReadBody(IAsyncResult result) {
+	public override int EndReadBody(IAsyncResult result) {
 	    return ActuallyReadTheBody.EndInvoke(result);
 	}
 #endregion

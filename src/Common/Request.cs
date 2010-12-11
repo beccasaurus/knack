@@ -15,7 +15,7 @@ namespace Owin {
     public class ParamsDictionary<TKey,TValue> : Dictionary<TKey,TValue>, IDictionary<TKey,TValue> {
 	public ParamsDictionary() : base() {}
 
-	public TValue this[TKey key] {
+	public new TValue this[TKey key] {
 	    get {
 		try {
 		    return base[key];
@@ -54,14 +54,14 @@ namespace Owin {
 	// It makes sense for Owin.Request to implement IRequest.
 	// We may eventually override some of the IRequest implementation 
 	// but, for now, we simply proxy everything to the InnerRequest
-	public string Method { get { return InnerRequest.Method; } }
-	public string Uri { get { return InnerRequest.Uri; } }
-	public IDictionary<string, IEnumerable<string>> Headers { get { return InnerRequest.Headers; } }
-	public IDictionary<string, object> Items { get { return InnerRequest.Items; } }
-	public IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+	public virtual string Method { get { return InnerRequest.Method; } }
+	public virtual string Uri { get { return InnerRequest.Uri; } }
+	public virtual IDictionary<string, IEnumerable<string>> Headers { get { return InnerRequest.Headers; } }
+	public virtual IDictionary<string, object> Items { get { return InnerRequest.Items; } }
+	public virtual IAsyncResult BeginReadBody(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
 	    return InnerRequest.BeginReadBody(buffer, offset, count, callback, state);
 	}
-	public int EndReadBody(IAsyncResult result){ return InnerRequest.EndReadBody(result); }
+	public virtual int EndReadBody(IAsyncResult result){ return InnerRequest.EndReadBody(result); }
 	#endregion
 
 	// this is a crappy name ... what is this, really?  we might want to rename this property
