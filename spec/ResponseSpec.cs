@@ -148,5 +148,10 @@ namespace Owin.Common.Specs {
 		Assert.That(response.ContentLength, Is.EqualTo(1));
 	    }
 	}
+
+	[TestFixture]
+	public class Reading : ResponseSpec { // TODO add examples of helpers that Owin.Response has for reading things like headers, body, etc
+
+	}
     }
 }
