@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Common", "src\Common\O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Common.Specs", "spec\Common\Owin.Common.Specs.csproj", "{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Handlers.Kayak", "src\Handlers\Kayak\Owin.Handlers.Kayak.csproj", "{A9655B65-88EB-435E-AA21-2F38879F2A75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7A47AA6-06A9-40F5-9D0B-E82CF75ED28F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9655B65-88EB-435E-AA21-2F38879F2A75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9655B65-88EB-435E-AA21-2F38879F2A75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9655B65-88EB-435E-AA21-2F38879F2A75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9655B65-88EB-435E-AA21-2F38879F2A75}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

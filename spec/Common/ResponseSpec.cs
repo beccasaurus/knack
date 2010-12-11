@@ -137,6 +137,12 @@ namespace Owin.Common.Specs {
             }
 
             [Test]
+            public void Can_write_to_body_passing_object_to_interpolate() {
+                response.Write("Hi {0} There {1} Crazy {2} Person {3}", 1, "neat", 12.34, '!');
+                Assert.That(response.BodyText, Is.EqualTo("Hi 1 There neat Crazy 12.34 Person !"));
+            }
+
+            [Test]
             public void Writing_to_body_updates_content_length() {
                 Assert.That(response.BodyText, Is.EqualTo(""));
                 Assert.That(response.ContentLength, Is.EqualTo(0));

@@ -144,6 +144,10 @@ namespace Owin {
             return this;
         }
 
+        public Response Write(string writeToBody, params object[] objects) {
+            return Write(string.Format(writeToBody, objects));
+        }
+
         public void Clear() {
             BodyText = "";
         }

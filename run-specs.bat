@@ -4,4 +4,4 @@ SET NUNIT_CONSOLE = tools\nunit-console.exe
 
 RMDIR /Q bin
 
-MSBuild && tools\nunit-color-console.exe bin\Debug\Owin.Common.Specs.dll
+MSBuild && tools\nunit-color-console.exe /labels bin\Debug\Owin.Common.Specs.dll
