@@ -78,14 +78,14 @@ namespace Owin.Common.Specs {
             [Test]
             public void Can_make_new_with_status_code_and_headers_as_string_string_dictionary() {
                 response = new Response(301, new Dictionary<string, string> { { "location", "/new/path" } });
-                Assert.That(response.Status, Is.EqualTo("301 MovedPermanently"));
+                Assert.That(response.Status, Is.StringContaining("301 Moved")); // MS.NET: MovedPermanently, Mono: Moved
                 Assert.That(response.Headers["location"], Is.EqualTo(new string[] { "/new/path" }));
             }
 
             [Test]
             public void Can_make_new_with_status_code_and_headers() {
                 response = new Response(301, new Dictionary<string, IEnumerable<string>> { { "location", new string[] { "/new/path" } } });
-                Assert.That(response.Status, Is.EqualTo("301 MovedPermanently"));
+                Assert.That(response.Status, Is.StringContaining("301 Moved"));
                 Assert.That(response.Headers["location"], Is.EqualTo(new string[] { "/new/path" }));
             }
 
