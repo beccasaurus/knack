@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Collections.Generic;
@@ -7,6 +8,8 @@ using System.Collections.Specialized;
 namespace Owin {
 
     public class Response : IResponse {
+
+#region Constructors
 
 	public Response() {
 	    SetValidDefaults();
@@ -42,31 +45,59 @@ namespace Owin {
 	    if (headers    != null) AddHeaders(headers);
 	}
 
-	void SetValidDefaults() {
-	    Status      = "200 OK";
-	    Headers     = new Dictionary<string, IEnumerable<string>>();
-	    Body        = new object[] { "" };
-	    ContentType = "text/html";
+#endregion
+
+#region Status
+
+        public string Status { get; set; }
+
+	public int StatusCode {
+	    get { return int.Parse(Status.Substring(0, Status.IndexOf(" "))); }
 	}
 
-	void SetStatus(int statusCode) {
+	public string StatusMessage {
+	    get { return Status.Substring(Status.IndexOf(" ") + 1); }
+	}
+
+	public Response SetStatus(int statusCode) {
 	    string statusMessage = ((HttpStatusCode) statusCode).ToString();
 	    Status = string.Format("{0} {1}", statusCode, statusMessage);
+	    return this;
 	}
 
-	void AddHeaders(IDictionary<string,string> headers) {
-	    foreach (KeyValuePair<string,string> header in headers)
-		Headers[header.Key] = new string[] { header.Value };
+	public Response SetStatus(string status) {
+	    Status = status;
+	    return this;
 	}
 
-	void AddHeaders(IDictionary<string,IEnumerable<string>> headers) {
-	    foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
-		Headers[header.Key] = header.Value;
-	}
+#endregion
+
+#region Body
 
 	// Allowed object types: string, byte[], ArraySegment<byte>, FileInfo
         public IEnumerable<object> GetBody() {
 	    return Body;
+	}
+
+	/// <summary>Set the body to one or many objects, overriding any other values the body may have</summary>
+	public Response SetBody(params object[] objects) {
+	    if (objects.Length == 1 && objects[0] is IEnumerable<object>)
+		Body = objects[0] as IEnumerable<object>;
+	    else
+		Body = objects;
+	    return this;
+	}
+
+	/// <summary>Set the body to one or many objects, adding to any other values the body may have</summary>
+	public Response AddToBody(params object[] objects) {
+	    IEnumerable<object> stuffToAdd = objects;
+	    if (objects.Length == 1 && objects[0] is IEnumerable<object>)
+		stuffToAdd = objects[0] as IEnumerable<object>;
+
+	    List<object> allObjects = new List<object>(Body);
+	    allObjects.AddRange(stuffToAdd);
+	    Body = allObjects;
+	    return this;
 	}
 
         public IEnumerable<object> Body { get; set; }
@@ -98,20 +129,44 @@ namespace Owin {
 	    BodyText = "";
 	}
 
-        public string Status { get; set; }
+#endregion
 
-	public int StatusCode {
-	    get { return int.Parse(Status.Substring(0, Status.IndexOf(" "))); }
-	}
-
-	public string StatusMessage {
-	    get { return Status.Substring(Status.IndexOf(" ") + 1); }
-	}
+#region Headers
 
         public IDictionary<string, IEnumerable<string>> Headers { get; set; }
 
-	public void SetHeader(string key, string value) {
+	/// <summary>Set header with a string, overriding any other values this header may have</summary>
+	public Response SetHeader(string key, string value) {
 	    Headers[key] = new string[] { value };
+	    return this;
+	}
+
+	/// <summary>Set header, overriding any other values this header may have</summary>
+	public Response SetHeader(string key, IEnumerable<string> value) {
+	    Headers[key] = value;
+	    return this;
+	}
+
+	/// <summary>Set header with a string, adding to any other values this header may have</summary>
+	public Response AddHeader(string key, string value) {
+	    if (Headers.ContainsKey(key)) {
+		List<string> listOfValues = new List<string>(Headers[key]);
+		listOfValues.Add(value);
+		SetHeader(key, listOfValues.ToArray());
+	    } else
+		SetHeader(key, value);
+	    return this;
+	}
+
+	/// <summary>Set header, adding to any other values this header may have</summary>
+	public Response AddHeader(string key, IEnumerable<string> value) {
+	    if (Headers.ContainsKey(key)) {
+		List<string> listOfValues = new List<string>(Headers[key]);
+		listOfValues.AddRange(value);
+		SetHeader(key, listOfValues.ToArray());
+	    } else
+		SetHeader(key, value);
+	    return this;
 	}
 
 	public string ContentType {
@@ -127,7 +182,26 @@ namespace Owin {
 	    set { SetHeader("content-length", value.ToString()); }
 	}
 
-	// private
+#endregion
+
+#region Private
+
+	void SetValidDefaults() {
+	    Status      = "200 OK";
+	    Headers     = new Dictionary<string, IEnumerable<string>>();
+	    Body        = new object[] { "" };
+	    ContentType = "text/html";
+	}
+
+	void AddHeaders(IDictionary<string,string> headers) {
+	    foreach (KeyValuePair<string,string> header in headers)
+		Headers[header.Key] = new string[] { header.Value };
+	}
+
+	void AddHeaders(IDictionary<string,IEnumerable<string>> headers) {
+	    foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
+		Headers[header.Key] = header.Value;
+	}
 	
 	// If this header has multiple values, we return the first
 	string HeaderOrNull(string key) {
@@ -141,5 +215,6 @@ namespace Owin {
 	    } else
 		return null;
 	}
+#endregion
     }
 }

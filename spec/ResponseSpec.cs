@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Text;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Owin;
@@ -147,11 +149,182 @@ namespace Owin.Common.Specs {
 		response.BodyText = "1"; 
 		Assert.That(response.ContentLength, Is.EqualTo(1));
 	    }
+
+	    [TestFixture]
+	    public class Fluent : ResponseSpec {
+
+		[Test]
+		public void Can_SetHeader_with_string() {
+		    response = new Response().SetHeader("content-type", "application/json");
+		    Assert.That(response.Headers["content-type"], Is.EqualTo(new string[] { "application/json" }));
+		}
+
+		[Test]
+		public void Can_SetHeader_with_IEnumerable_string() {
+		    response = new Response().SetHeader("content-type", new string[] { "application/xml" });
+		    Assert.That(response.Headers["content-type"], Is.EqualTo(new string[] { "application/xml" }));
+		}
+
+		[Test]
+		public void Can_AddHeader_which_adds_to_the_IEnumerable_with_string() {
+		    response = new Response().SetHeader("content-type", "application/json").SetHeader("content-type", "application/second");
+		    Assert.That(response.Headers["content-type"], Is.EqualTo(new string[] { "application/second" }));
+
+		    // Now use AddHeader, and both values should be present
+		    response = new Response().SetHeader("content-type", "application/json").AddHeader("content-type", "application/second");
+		    Assert.That(response.Headers["content-type"], Is.EqualTo(new string[] { "application/json", "application/second" }));
+		}
+
+		[Test]
+		public void Can_AddHeader_which_adds_to_the_IEnumerable_with_IEnumerable_string() {
+		    response = new Response().SetHeader("content-type", new string[] { "application/json" }).SetHeader("content-type", new string[] { "application/second" });
+		    Assert.That(response.Headers["content-type"], Is.EqualTo(new string[] { "application/second" }));
+
+		    // Now use AddHeader, and both values should be present
+		    response = new Response().SetHeader("content-type", new string[] { "application/json" }).AddHeader("content-type", new string[] { "application/second" });
+		    Assert.That(response.Headers["content-type"], Is.EqualTo(new string[] { "application/json", "application/second" }));
+		}
+
+		[Test]
+		public void Can_SetStatus_with_an_int() {
+		    response = new Response().SetStatus(200);
+		    Assert.That(response.Status, Is.EqualTo("200 OK"));
+
+		    response = new Response().SetStatus(404);
+		    Assert.That(response.Status, Is.EqualTo("404 NotFound"));
+		}
+
+		[Test]
+		public void Can_SetStatus_with_a_string() {
+		    response = new Response().SetStatus("200 Totally Friggin OK");
+		    Assert.That(response.Status, Is.EqualTo("200 Totally Friggin OK"));
+		}
+
+		[Test]
+		public void Can_SetBody_with_a_string() {
+		    response          = new Response().SetBody("Hello World");
+		    List<object> body = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(1));
+		    Assert.That(body[0], Is.EqualTo("Hello World"));
+		}
+
+		[Test]
+		public void Can_SetBody_with_a_byte_array() {
+		    response          = new Response().SetBody(new byte[] { (byte) 1, (byte) 2 });
+		    List<object> body = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(1));
+		    Assert.That(body[0], Is.EqualTo(new byte[] { (byte) 1, (byte) 2 }));
+		}
+
+		[Test]
+		public void Can_SetBody_with_an_ArraySegment_of_bytes() {
+		    byte[] bytes               = new byte[10];
+		    ArraySegment<byte> segment = new ArraySegment<byte>(bytes, 0, 5);
+		    response                   = new Response().SetBody(segment);
+		    List<object> body          = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(1));
+		    Assert.That(body[0], Is.EqualTo(segment));
+		}
+
+		[Test]
+		public void Can_SetBody_with_a_FileInfo() {
+		    FileInfo info     = new FileInfo(Assembly.GetExecutingAssembly().Location);
+		    response          = new Response().SetBody(info);
+		    List<object> body = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(1));
+		    Assert.That(body[0], Is.EqualTo(info));
+		}
+
+		[Test]
+		public void Can_SetBody_with_any_number_of_objects() {
+		    response          = new Response().SetBody("first", "second");
+		    List<object> body = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(2));
+		    Assert.That(body[0], Is.EqualTo("first"));
+		    Assert.That(body[1], Is.EqualTo("second"));
+
+		    FileInfo info = new FileInfo(Assembly.GetExecutingAssembly().Location);
+		    response      = new Response().SetBody("first", info, "another string");
+		    body          = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(3));
+		    Assert.That(body[0], Is.EqualTo("first"));
+		    Assert.That(body[1], Is.EqualTo(info));
+		    Assert.That(body[2], Is.EqualTo("another string"));
+		}
+		
+		[Test]
+		public void Can_SetBody_with_an_IEnumerable_of_objects() {
+		    FileInfo info               = new FileInfo(Assembly.GetExecutingAssembly().Location);
+		    IEnumerable<object> objects = new object[] { "a string", info };
+		    response                    = new Response().SetBody(objects);
+		    List<object> body           = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(2));
+		    Assert.That(body[0], Is.EqualTo("a string"));
+		    Assert.That(body[1], Is.EqualTo(info));
+
+		    // Trying to break it by passing a byte[] as the first argument, which might be an IEnumerable<object>?
+		    //
+		    // If you only pass one argument and it's an IEnumerable<object>, we use that as the body
+		    byte[] bytes = new byte[] { (byte) 1, (byte) 2 };
+		    response     = new Response().SetBody(bytes);
+		    body         = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(1));
+		    Assert.That(body[0], Is.EqualTo(bytes));
+		}
+
+		[Test]
+		public void Can_AddToBody_with_an_object() {
+		    response          = new Response().SetBody("first").SetBody("second");
+		    List<object> body = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(1));
+		    Assert.That(body[0], Is.EqualTo("second"));
+
+		    response = new Response().SetBody("first").AddToBody("second");
+		    body     = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(2));
+		    Assert.That(body[0], Is.EqualTo("first"));
+		    Assert.That(body[1], Is.EqualTo("second"));
+		}
+
+		[Test]
+		public void Can_AddToBody_with_objects() {
+		    FileInfo info     = new FileInfo(Assembly.GetExecutingAssembly().Location);
+		    response          = new Response().SetBody("first").AddToBody("second").AddToBody(info, "another string");
+		    List<object> body = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(4));
+		    Assert.That(body[0], Is.EqualTo("first"));
+		    Assert.That(body[1], Is.EqualTo("second"));
+		    Assert.That(body[2], Is.EqualTo(info));
+		    Assert.That(body[3], Is.EqualTo("another string"));
+		}
+
+		[Test]
+		public void Can_AddToBody_with_an_IEnumerable_of_objects() {
+		    FileInfo info               = new FileInfo(Assembly.GetExecutingAssembly().Location);
+		    IEnumerable<object> objects = new object[] { "a string", info };
+		    response                    = new Response().SetBody("first").AddToBody(objects).AddToBody("last");
+		    List<object> body           = response.GetBody().AsList();
+		    Assert.That(body.Count, Is.EqualTo(4));
+		    Assert.That(body[0], Is.EqualTo("first"));
+		    Assert.That(body[1], Is.EqualTo("a string"));
+		    Assert.That(body[2], Is.EqualTo(info));
+		    Assert.That(body[3], Is.EqualTo("last"));
+		}
+	    }
 	}
 
 	[TestFixture]
 	public class Reading : ResponseSpec { // TODO add examples of helpers that Owin.Response has for reading things like headers, body, etc
 
+	}
+    }
+
+    static class ResponseSpecExtensions {
+	public static List<object> AsList(this IEnumerable<object> enumerable) {
+	    return enumerable.AsList<object>();
+	}
+	public static List<T> AsList<T>(this IEnumerable<T> enumerable) {
+	    return new List<T>(enumerable);
 	}
     }
 }
