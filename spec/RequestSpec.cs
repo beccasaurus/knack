@@ -288,7 +288,7 @@ namespace Owin.Common.Specs {
 
 	[Test][Ignore] public void Can_get_IP() {}
 
-	[Test][Ignore] public void Can_be_instantiated_with_no_arguments_to_build_a_new_request() {}
+	[Test][Ignore] public void Can_be_instantiated_with_no_arguments_to_build_a_new_request() {} // <---- this is what we really need now ... Handlers.Request?
 
 	byte[] WithoutTrailingBytes(byte[] bytes) {
 	    int i = bytes.Length - 1;

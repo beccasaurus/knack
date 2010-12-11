@@ -45,6 +45,7 @@ namespace Owin {
 
 	public IRequest InnerRequest;
 
+	public Request() {}
 	public Request(IRequest innerRequest) {
 		InnerRequest = innerRequest;
 	}
@@ -205,12 +206,14 @@ namespace Owin {
 	    }
 	}
 
-	// If this header has multiple values, we return the last one
+	// If this header has multiple values, we return the first
 	string HeaderOrNull(string key) {
 	    if (InnerRequest.Headers.ContainsKey(key)) {
 		string value = null;
-		foreach (string headerValue in InnerRequest.Headers[key])
+		foreach (string headerValue in InnerRequest.Headers[key]) {
 		    value = headerValue;
+		    break;
+		}
 		return value;
 	    } else
 		return null;
