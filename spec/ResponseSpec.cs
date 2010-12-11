@@ -104,6 +104,17 @@ namespace Owin.Common.Specs {
 		Assert.That(response.Status, Is.EqualTo("404 NotFound"));
 		Assert.That(response.Headers["content-type"], Is.EqualTo(new string[]{ "text/plain" }));
 	    }
+
+	    [Test]
+	    public void Can_take_an_existing_IResponse() {
+		IResponse resp = new Response(404, "We couldn't find that", new Dictionary<string,string>{{"content-type", "text/plain"}});
+
+		response = new Response(resp);
+
+		Assert.That(response.BodyText, Is.EqualTo("We couldn't find that"));
+		Assert.That(response.Status, Is.EqualTo("404 NotFound"));
+		Assert.That(response.Headers["content-type"], Is.EqualTo(new string[]{ "text/plain" }));
+	    }
 	}
 
 	[TestFixture]

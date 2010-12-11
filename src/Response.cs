@@ -45,6 +45,17 @@ namespace Owin {
 	    if (headers    != null) AddHeaders(headers);
 	}
 
+	public Response(IResponse response) : this() {
+	    if (response.Status != null)
+		Status = response.Status;
+
+	    if (response.Headers != null)
+		Headers = response.Headers;
+
+	    foreach (object o in response.GetBody())
+		AddToBody(o);
+	}
+
 #endregion
 
 #region Status
@@ -79,6 +90,9 @@ namespace Owin {
 	    return Body;
 	}
 
+        public IEnumerable<object> Body { get; set; }
+
+	// TODO this needs to update ContentLength!
 	/// <summary>Set the body to one or many objects, overriding any other values the body may have</summary>
 	public Response SetBody(params object[] objects) {
 	    if (objects.Length == 1 && objects[0] is IEnumerable<object>)
@@ -100,8 +114,6 @@ namespace Owin {
 	    return this;
 	}
 
-        public IEnumerable<object> Body { get; set; }
-
 	public string BodyText {
 	    get {
 		string text = "";
@@ -121,8 +133,9 @@ namespace Owin {
 
 	// might swap this out with a string builder ... 
 	// it's tough because we should be able to write bytes as well!
-	public void Write(string writeToBody) {
+	public Response Write(string writeToBody) {
 	    BodyText += writeToBody;
+	    return this;
 	}
 
 	public void Clear() {
@@ -189,7 +202,7 @@ namespace Owin {
 	void SetValidDefaults() {
 	    Status      = "200 OK";
 	    Headers     = new Dictionary<string, IEnumerable<string>>();
-	    Body        = new object[] { "" };
+	    Body        = new object[] { };
 	    ContentType = "text/html";
 	}
 
