@@ -31,6 +31,10 @@ namespace Owin {
 	    return this;
 	}
 
+	public IApplication ToApp() {
+	    return ToApplication();
+	}
+
 	public IApplication ToApplication() {
 	    if (Middlewares.Count == 0)
 		return Application;
