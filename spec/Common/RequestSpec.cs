@@ -232,6 +232,16 @@ namespace Owin.Common.Specs {
             Assert.False(R(req).HasFormData);
         }
 
+	// we shouldn't have to *always* enumerate thru values
+	[Test]
+	public void Can_easily_get_the_string_value_for_a_Header_if_you_know_a_header_will_only_have_1_value() {
+            Req r = new Req();
+            r.Headers["content-type"] = new string[] { "text/plain" };
+
+	    Assert.That(R(r).Headers["content-type"], Is.EqualTo(new string[] { "text/plain" }));
+	    Assert.That(R(r).GetHeader("content-type"), Is.EqualTo("text/plain"));
+	}
+
         [Test]
         [Ignore]
         public void Can_get_Params_from_either_a_QueryString_or_POST_variable() { }

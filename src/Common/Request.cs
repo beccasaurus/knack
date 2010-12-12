@@ -110,11 +110,26 @@ namespace Owin {
             }
         }
 
-        public string ContentType {
-            get { return HeaderOrNull("content-type"); }
+	/// <summary>Returns the first value of the given header or null if the header does not exist</summary>
+	public virtual string GetHeader(string key) {
+	    key = key.ToLower(); // <--- instead of doing this everywhere, it would be ideal if the Headers IDictionary could do this by itself!
+	    if (! Headers.ContainsKey(key))
+		return null;
+	    else {
+		string value = null;
+		foreach (string headerValue in Headers[key]) {
+		    value = headerValue;
+		    break;   
+		}
+		return value;
+	    }
+	}
+
+        public virtual string ContentType {
+            get { return GetHeader("content-type"); }
         }
 
-        public bool HasFormData {
+        public virtual bool HasFormData {
             get {
                 if (FormDataMediaTypes.Contains(ContentType))
                     return true;
@@ -217,19 +232,6 @@ namespace Owin {
                 Array.Copy(bytes, newBytes, i + 1);
                 return newBytes;
             }
-        }
-
-        // If this header has multiple values, we return the first
-        string HeaderOrNull(string key) {
-            if (InnerRequest.Headers.ContainsKey(key)) {
-                string value = null;
-                foreach (string headerValue in InnerRequest.Headers[key]) {
-                    value = headerValue;
-                    break;
-                }
-                return value;
-            } else
-                return null;
         }
 
         string StringItemOrNull(string key) {

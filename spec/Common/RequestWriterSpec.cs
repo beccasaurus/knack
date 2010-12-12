@@ -151,6 +151,12 @@ namespace Owin.Common.Specs {
                 }
 
                 [Test]
+                public void SetHeader_automatically_lowercases_header_keys_as_required_by_the_owin_spec() {
+                    request = new RequestWriter().SetHeader("CONTENT-type", "application/json");
+                    Assert.That(request.Headers["content-type"], Is.EqualTo(new string[] { "application/json" }));
+		}
+
+                [Test]
                 public void Can_SetHeader_with_IEnumerable_string() {
                     request = new RequestWriter().SetHeader("content-type", new string[] { "application/xml" });
                     Assert.That(request.Headers["content-type"], Is.EqualTo(new string[] { "application/xml" }));

@@ -168,6 +168,28 @@ namespace Owin.Handlers.Specs {
 	[TestFixture]
 	public class Headers : CgiRequestSpec {
 
+	    [Test]
+	    public void ContentType_gets_set_by_CONTENT_TYPE_header() {
+		request = new CgiRequest(ENV_Simple);
+		Assert.That(request.ContentType, Is.Null);
+
+		request = new CgiRequest(GetEnvironmentVariables(new Dictionary<string,string>{{"CONTENT_TYPE","application/json"}}));
+		Assert.That(request.ContentType, Is.EqualTo("application/json"));
+	    }
+
+	    [Test]
+	    public void All_environment_variables_become_headers() {
+		request = new CgiRequest(ENV_Simple);
+
+		Assert.That(request.GetHeader("REMOTE_HOST"),     Is.EqualTo("localhost"));
+		Assert.That(request.GetHeader("QUERY_STRING"),    Is.EqualTo(""));
+		Assert.That(request.GetHeader("SCRIPT_NAME"),     Is.EqualTo("/cgi-runner.cgi"));
+		Assert.That(request.GetHeader("REQUEST_METHOD"),  Is.EqualTo("GET"));
+		Assert.That(request.GetHeader("REQUEST_URI"),     Is.EqualTo("http://localhost:3000/cgi-runner.cgi/"));
+		Assert.That(request.GetHeader("SERVER_NAME"),     Is.EqualTo("localhost"));
+		Assert.That(request.GetHeader("SERVER_PORT"),     Is.EqualTo("3000"));
+		Assert.That(request.GetHeader("HTTP_USER_AGENT"), Is.EqualTo("curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18"));
+	    }
 	}
 
 	[TestFixture]

@@ -71,18 +71,19 @@ namespace Owin {
 
         /// <summary>Set header with a string, overriding any other values this header may have</summary>
         public RequestWriter SetHeader(string key, string value) {
-            Headers[key] = new string[] { value };
+            Headers[key.ToLower()] = new string[] { value };
             return this;
         }
 
         /// <summary>Set header, overriding any other values this header may have</summary>
         public RequestWriter SetHeader(string key, IEnumerable<string> value) {
-            Headers[key] = value;
+            Headers[key.ToLower()] = value;
             return this;
         }
 
         /// <summary>Set header with a string, adding to any other values this header may have</summary>
         public RequestWriter AddHeader(string key, string value) {
+	    key = key.ToLower();
             if (Headers.ContainsKey(key)) {
                 List<string> listOfValues = new List<string>(Headers[key]);
                 listOfValues.Add(value);
@@ -94,6 +95,7 @@ namespace Owin {
 
         /// <summary>Set header, adding to any other values this header may have</summary>
         public RequestWriter AddHeader(string key, IEnumerable<string> value) {
+	    key = key.ToLower();
             if (Headers.ContainsKey(key)) {
                 List<string> listOfValues = new List<string>(Headers[key]);
                 listOfValues.AddRange(value);

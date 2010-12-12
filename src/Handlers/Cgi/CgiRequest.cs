@@ -15,7 +15,9 @@ namespace Owin.Handlers {
 	    ENV = new Dictionary<string,string>();
 	    foreach (DictionaryEntry entry in environmentVariables)
 		ENV[entry.Key.ToString()] = entry.Value.ToString();
+
 	    SetItemsFromENV();
+	    ImportHeadersFromENV();
 	}
 
 	public override string Uri {
@@ -30,6 +32,23 @@ namespace Owin.Handlers {
 	    get { return ENV["REQUEST_URI"]; }
 	}
 
+	// TODO by default, Headers/Items in Request and RequestWriter should be a Dictionary that returns null when you ask for a non-existent key
+	//      this behavior makes sense in web application, IMHO.
+	public override string ContentType {
+	    get {
+		// TODO Request.GetHeader() for getting a single value
+		if (Headers.ContainsKey("content_type")) {
+		    string value = null;
+		    foreach (string headerValue in Headers["content_type"]) {
+			value = headerValue;
+			break;
+		    }
+		    return value;
+		} else
+		    return null;
+	    }
+	}
+
 	#region Private
 	Uri RawUri {
 	    get { return new Uri(Url); }
@@ -42,6 +61,11 @@ namespace Owin.Handlers {
 	    Items["owin.request_protocol"] = ENV["SERVER_PROTOCOL"];
 	    Items["owin.url_scheme"]       = RawUri.Scheme;
 	    Items["owin.remote_endpoint"]  = new IPEndPoint(IPAddress.Parse(ENV["REMOTE_ADDR"]), Port);
+	}
+
+	void ImportHeadersFromENV() {
+	    foreach (KeyValuePair<string,string> variable in ENV)
+		SetHeader(variable.Key, variable.Value);
 	}
 	#endregion
     }
