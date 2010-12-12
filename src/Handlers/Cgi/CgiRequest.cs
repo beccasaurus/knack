@@ -19,6 +19,7 @@ namespace Owin.Handlers {
 
 	    foreach (DictionaryEntry entry in environmentVariables)
 		ENV[entry.Key.ToString()] = entry.Value.ToString();
+
 	    SetItemsFromENV();
 	    ImportHeadersFromENV();
 	}

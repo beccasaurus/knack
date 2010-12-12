@@ -158,6 +158,14 @@ namespace Owin {
 
         public IDictionary<string, IEnumerable<string>> Headers { get; set; }
 
+	public Response Redirect(string location) {
+	    return Redirect(302, location);
+	}
+
+	public Response Redirect(int statusCode, string location) {
+	    return SetStatus(statusCode).SetHeader("location", location);
+	}
+
         /// <summary>Set header with a string, overriding any other values this header may have</summary>
         public Response SetHeader(string key, string value) {
             Headers[key] = new string[] { value };
@@ -192,14 +200,30 @@ namespace Owin {
             return this;
         }
 
+	/// <summary>Returns the first value of the given header or null if the header does not exist</summary>
+	public virtual string GetHeader(string key) {
+	    key = key.ToLower(); // <--- instead of doing this everywhere, it would be ideal if the Headers IDictionary could do this by itself!
+	    if (! Headers.ContainsKey(key))
+		return null;
+	    else {
+		string value = null;
+		foreach (string headerValue in Headers[key]) {
+		    value = headerValue;
+		    break;   
+		}
+		return value;
+	    }
+	}
+
+
         public string ContentType {
-            get { return HeaderOrNull("content-type"); }
+            get { return GetHeader("content-type"); }
             set { SetHeader("content-type", value); }
         }
 
         public int ContentLength {
             get {
-                string length = HeaderOrNull("content-length");
+                string length = GetHeader("content-length");
                 return (length == null) ? 0 : int.Parse(length);
             }
             set { SetHeader("content-length", value.ToString()); }
@@ -208,7 +232,6 @@ namespace Owin {
         #endregion
 
         #region Private
-
         void SetValidDefaults() {
             Status = "200 OK";
             Headers = new Dictionary<string, IEnumerable<string>>();
@@ -224,19 +247,6 @@ namespace Owin {
         void AddHeaders(IDictionary<string, IEnumerable<string>> headers) {
             foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
                 Headers[header.Key] = header.Value;
-        }
-
-        // If this header has multiple values, we return the first
-        string HeaderOrNull(string key) {
-            if (Headers.ContainsKey(key)) {
-                string value = null;
-                foreach (string headerValue in Headers[key]) {
-                    value = headerValue;
-                    break;
-                }
-                return value;
-            } else
-                return null;
         }
         #endregion
     }

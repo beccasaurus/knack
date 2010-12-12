@@ -170,11 +170,34 @@ namespace Owin.Common.Specs {
             [TestFixture]
             public class Fluent : ResponseSpec {
 
+		[Test][Ignore]
+		public void Can_set_cookie(){}
+
                 [Test]
                 public void Can_SetHeader_with_string() {
                     response = new Response().SetHeader("content-type", "application/json");
                     Assert.That(response.Headers["content-type"], Is.EqualTo(new string[] { "application/json" }));
                 }
+
+		[Test]
+		public void Can_redirect_to_a_path_using_302_by_default() {
+		    response = new Response().Redirect("/go/here");
+		    Assert.That(response.StatusCode,            Is.EqualTo(302));
+		    Assert.That(response.GetHeader("location"), Is.EqualTo("/go/here"));
+		}
+
+		[Test]
+		public void Can_redirect_to_a_path_specifying_the_status_code() {
+		    response = new Response().Redirect(301, "/here");
+		    Assert.That(response.StatusCode,            Is.EqualTo(301));
+		    Assert.That(response.GetHeader("location"), Is.EqualTo("/here"));
+		}
+
+		[Test][Ignore]
+		public void Can_redirect_to_a_path_relative_to_the_BasePath() {}
+
+		[Test][Ignore]
+		public void Can_easily_get_a_path_relative_to_the_BasePath() {}
 
                 [Test]
                 public void Can_SetHeader_with_IEnumerable_string() {

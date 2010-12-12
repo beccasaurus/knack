@@ -193,6 +193,40 @@ namespace Owin.Common.Specs {
         }
 
         [Test]
+        public void Can_get_the_value_of_a_POST_or_GET_variable_with_Params() {
+            Req r = new Req { Uri = "/?foo=bar", Method = "POST" };
+	    r.BodyString = "a=1&b=2&hi=there";
+	    Request request = R(r);
+
+	    Assert.That(request.GET.Count,  Is.EqualTo(1));
+	    Assert.That(request.POST.Count, Is.EqualTo(3));
+	    Assert.That(request.Params.Count, Is.EqualTo(4));
+
+	    Assert.That(request.Params["foo"],     Is.EqualTo("bar"));
+	    Assert.That(request.Params["a"],       Is.EqualTo("1"));
+	    Assert.That(request.Params["b"],       Is.EqualTo("2"));
+	    Assert.That(request.Params["hi"],      Is.EqualTo("there"));
+	    Assert.That(request.Params["noExist"], Is.Null);
+	}
+
+        [Test]
+        public void Can_get_the_value_of_a_POST_or_GET_variable_via_indexer_which_is_an_alias_to_Params() {
+            Req r = new Req { Uri = "/?foo=bar", Method = "POST" };
+	    r.BodyString = "a=1&b=2&hi=there";
+	    Request request = R(r);
+
+	    Assert.That(request.GET.Count,  Is.EqualTo(1));
+	    Assert.That(request.POST.Count, Is.EqualTo(3));
+	    Assert.That(request.Params.Count, Is.EqualTo(4));
+
+	    Assert.That(request["foo"],     Is.EqualTo("bar"));
+	    Assert.That(request["a"],       Is.EqualTo("1"));
+	    Assert.That(request["b"],       Is.EqualTo("2"));
+	    Assert.That(request["hi"],      Is.EqualTo("there"));
+	    Assert.That(request["noExist"], Is.Null);
+	}
+
+        [Test]
         public void Can_get_the_request_content_type() {
             Req req = new Req();
             req.Headers["content-type"] = new string[] { "text/html" };
@@ -241,10 +275,6 @@ namespace Owin.Common.Specs {
 	    Assert.That(R(r).Headers["content-type"], Is.EqualTo(new string[] { "text/plain" }));
 	    Assert.That(R(r).GetHeader("content-type"), Is.EqualTo("text/plain"));
 	}
-
-        [Test]
-        [Ignore]
-        public void Can_get_Params_from_either_a_QueryString_or_POST_variable() { }
 
         [Test]
         [Ignore]

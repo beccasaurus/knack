@@ -11,7 +11,6 @@ namespace Owin {
         public InvalidRequestException(string message) : base(message) { }
     }
 
-    // ...
     public class ParamsDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IDictionary<TKey, TValue> {
 
         public ParamsDictionary() : base() { }
@@ -157,9 +156,25 @@ namespace Owin {
             get { return new Uri(Url).Query.Replace("?", ""); }
         }
 
-        public IDictionary<string, string> GET {
+	// alias to Params
+	public string this[string key] {
+	    get { return Params[key]; }
+	}
+
+	public IDictionary<string,string> Params {
+	    get {
+		Dictionary<string,string> getAndPost = new ParamsDictionary<string,string>();
+		foreach (KeyValuePair<string,string> item in GET)
+		    getAndPost.Add(item.Key, item.Value);
+		foreach (KeyValuePair<string,string> item in POST)
+		    getAndPost.Add(item.Key, item.Value);
+		return getAndPost;
+	    }
+	}
+
+        public IDictionary<string,string> GET {
             get {
-                IDictionary<string, string> get = new ParamsDictionary<string, string>();
+                IDictionary<string,string> get = new ParamsDictionary<string,string>();
                 NameValueCollection queryStrings = HttpUtility.ParseQueryString(QueryString);
                 foreach (string key in queryStrings)
                     get.Add(key, queryStrings[key]);
@@ -167,10 +182,9 @@ namespace Owin {
             }
         }
 
-        // waiting on content type and form data ...
-        public IDictionary<string, string> POST {
+        public IDictionary<string,string> POST {
             get {
-                IDictionary<string, string> post = new ParamsDictionary<string, string>();
+                IDictionary<string,string> post = new ParamsDictionary<string,string>();
                 if (!HasFormData) return post;
 
                 NameValueCollection postVariables = HttpUtility.ParseQueryString(Body);

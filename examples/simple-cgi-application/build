@@ -1,0 +1,5 @@
+#! /bin/bash
+cp ../../bin/Debug/*.dll .
+rm CgiApp.exe*
+gmcs CgiApp.cs /r:owin.dll  /r:Owin.Common.dll  /r:Owin.Handlers.Cgi.dll
+mv CgiApp.exe CgiApp.exe.cgi
