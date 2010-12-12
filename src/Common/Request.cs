@@ -66,7 +66,6 @@ namespace Owin {
         public virtual int EndReadBody(IAsyncResult result) { return InnerRequest.EndReadBody(result); }
         #endregion
 
-        // this is a crappy name ... what is this, really?  we might want to rename this property
         public string BasePath {
             get { return InnerRequest.Items["owin.base_path"].ToString(); }
         }
@@ -86,7 +85,19 @@ namespace Owin {
             }
         }
 
-        public string Url {
+	public string Protocol {
+	    get { return StringItemOrNull("owin.request_protocol"); }
+	}
+
+	public IPEndPoint IPEndPoint {
+	    get { return Items["owin.remote_endpoint"] as IPEndPoint; }
+	}
+
+	public IPAddress IPAddress {
+	    get { return IPEndPoint.Address; }
+	}
+
+        public virtual string Url {
             get {
                 string url = Scheme + "://" + Host;
 

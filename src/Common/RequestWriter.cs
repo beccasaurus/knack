@@ -49,7 +49,7 @@ namespace Owin {
         #endregion
 
         #region Method
-        public new string Method { get; set; }
+        public virtual string Method { get; set; }
 
         public RequestWriter SetMethod(string method) {
             Method = method;
@@ -58,7 +58,7 @@ namespace Owin {
         #endregion
 
         #region Uri
-        public new string Uri { get; set; }
+        public virtual string Uri { get; set; }
 
         public RequestWriter SetUri(string uri) {
             Uri = uri;

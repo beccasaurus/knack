@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 using Owin;
 using NUnit.Framework;
 
-// TODO omg, we need to refactor this spec, it's bad!  they should be more like the Lint specs, each of them with a request
+// TODO omg, we need to refactor this spec, it's bad!  they should be more like the Lint specs, each of them with a request.  they should also validate each request!
 namespace Owin.Common.Specs {
 
     // *Simple* struct-like IRequest implementation for RequestSpec
@@ -235,6 +235,7 @@ namespace Owin.Common.Specs {
         [Test]
         [Ignore]
         public void Can_get_Params_from_either_a_QueryString_or_POST_variable() { }
+
         [Test]
         [Ignore]
         public void Can_get_referer_or_referrer() { }
@@ -276,8 +277,26 @@ namespace Owin.Common.Specs {
         public void Can_get_port_from_header() { }
 
         [Test]
-        [Ignore]
-        public void Can_get_scheme() { }
+        public void Can_get_protocol() {
+            Req r = new Req();
+
+            r.Items["owin.request_protocol"] = "HTTP/1.1";
+            Assert.That(R(r).Protocol, Is.EqualTo("HTTP/1.1"));
+
+            r.Items["owin.request_protocol"] = "HTTP/1.0";
+            Assert.That(R(r).Protocol, Is.EqualTo("HTTP/1.0"));
+	}
+
+        [Test]
+        public void Can_get_scheme() {
+            Req r = new Req();
+
+            r.Items["owin.url_scheme"] = "http";
+            Assert.That(R(r).Scheme, Is.EqualTo("http"));
+
+            r.Items["owin.url_scheme"] = "https";
+            Assert.That(R(r).Scheme, Is.EqualTo("https"));
+	}
 
         [Test]
         public void Has_predicate_properties_for_checking_request_method_type() {
@@ -299,9 +318,27 @@ namespace Owin.Common.Specs {
             Assert.False(R(r).IsGet); Assert.False(R(r).IsPost); Assert.False(R(r).IsPut); Assert.False(R(r).IsDelete); Assert.True(R(r).IsHead);
         }
 
+	[Test]
+	public void Can_get_IPAddress() {
+            Req r = new Req();
+
+            r.Items["owin.remote_endpoint"] = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
+            Assert.That(R(r).IPAddress.ToString(), Is.EqualTo("127.0.0.1"));
+
+            r.Items["owin.remote_endpoint"] = new IPEndPoint(IPAddress.Parse("192.168.0.1"), 443);
+            Assert.That(R(r).IPAddress.ToString(), Is.EqualTo("192.168.0.1"));
+	}
+
         [Test]
-        [Ignore]
-        public void Can_get_IP() { }
+        public void Can_get_IPEndPoint() {
+            Req r = new Req();
+
+            r.Items["owin.remote_endpoint"] = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
+            Assert.That(R(r).IPEndPoint.ToString(), Is.EqualTo("127.0.0.1:80"));
+
+            r.Items["owin.remote_endpoint"] = new IPEndPoint(IPAddress.Parse("192.168.0.1"), 443);
+            Assert.That(R(r).IPEndPoint.ToString(), Is.EqualTo("192.168.0.1:443"));
+	}
 
         [Test]
         [Ignore]
