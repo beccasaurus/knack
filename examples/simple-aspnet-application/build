@@ -1,0 +1,5 @@
+#! /bin/bash
+mkdir -pv Bin
+cp ../../bin/Debug/*.dll .
+gmcs -target:library AspNetApp.cs -r:owin.dll -r:Owin.Common.dll -r:Owin.Handlers.AspNet.dll -r:System.Web.dll
+cp -v *.dll Bin/
