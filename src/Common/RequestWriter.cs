@@ -22,32 +22,37 @@ namespace Owin {
             SetValidDefaults();
         }
 
-        public RequestWriter(string uri) : this() {
+        public RequestWriter(string uri)
+            : this() {
             Uri = uri;
         }
 
-        public RequestWriter(string method, string uri) : this() {
+        public RequestWriter(string method, string uri)
+            : this() {
             Method = method;
             Uri = uri;
         }
 
-        public RequestWriter(string method, string uri, string body) : this() {
+        public RequestWriter(string method, string uri, string body)
+            : this() {
             Method = method;
             Uri = uri;
             TheRealBody = body;
         }
 
-        public RequestWriter(string method, string uri, byte[] body) : this() {
+        public RequestWriter(string method, string uri, byte[] body)
+            : this() {
             Method = method;
             Uri = uri;
             TheRealBodyBytes = body;
         }
 
-	public RequestWriter(IRequest rawRequest) : this() {
-	    Method = rawRequest.Method;
-	    Uri = rawRequest.Uri;
-	    TheRealBodyBytes = new Request(rawRequest).BodyBytes;
-	}
+        public RequestWriter(IRequest rawRequest)
+            : this() {
+            Method = rawRequest.Method;
+            Uri = rawRequest.Uri;
+            TheRealBodyBytes = new Request(rawRequest).BodyBytes;
+        }
         #endregion
 
         #region Method
@@ -71,31 +76,31 @@ namespace Owin {
         #region Headers
         public new IDictionary<string, IEnumerable<string>> Headers { get; set; }
 
-	public RequestWriter SetContentType(string type) {
-	    ContentType = type;
-	    return this;
-	}
+        public virtual RequestWriter SetContentType(string type) {
+            ContentType = type;
+            return this;
+        }
 
-        public string ContentType {
+        public virtual string ContentType {
             get { return GetHeader("content-type"); }
             set { SetHeader("content-type", value); }
         }
 
         /// <summary>Set header with a string, overriding any other values this header may have</summary>
-        public RequestWriter SetHeader(string key, string value) {
+        public virtual RequestWriter SetHeader(string key, string value) {
             Headers[key.ToLower()] = new string[] { value };
             return this;
         }
 
         /// <summary>Set header, overriding any other values this header may have</summary>
-        public RequestWriter SetHeader(string key, IEnumerable<string> value) {
+        public virtual RequestWriter SetHeader(string key, IEnumerable<string> value) {
             Headers[key.ToLower()] = value;
             return this;
         }
 
         /// <summary>Set header with a string, adding to any other values this header may have</summary>
-        public RequestWriter AddHeader(string key, string value) {
-	    key = key.ToLower();
+        public virtual RequestWriter AddHeader(string key, string value) {
+            key = key.ToLower();
             if (Headers.ContainsKey(key)) {
                 List<string> listOfValues = new List<string>(Headers[key]);
                 listOfValues.Add(value);
@@ -106,8 +111,8 @@ namespace Owin {
         }
 
         /// <summary>Set header, adding to any other values this header may have</summary>
-        public RequestWriter AddHeader(string key, IEnumerable<string> value) {
-	    key = key.ToLower();
+        public virtual RequestWriter AddHeader(string key, IEnumerable<string> value) {
+            key = key.ToLower();
             if (Headers.ContainsKey(key)) {
                 List<string> listOfValues = new List<string>(Headers[key]);
                 listOfValues.AddRange(value);
@@ -139,9 +144,9 @@ namespace Owin {
             return this;
         }
 
-	public RequestWriter SetBody(IDictionary<string,string> postData) {
-	    return SetBody(Owin.Util.ToQueryString(postData));
-	}
+        public RequestWriter SetBody(IDictionary<string, string> postData) {
+            return SetBody(Owin.Util.ToQueryString(postData));
+        }
 
         public RequestWriter SetBody(byte[] body) {
             TheRealBodyBytes = body;
