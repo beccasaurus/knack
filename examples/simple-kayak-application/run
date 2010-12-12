@@ -1,0 +1,4 @@
+#! /bin/bash
+cp ../../bin/Debug/*.dll .
+dmcs RunKayakApp.cs /r:owin.dll  /r:Owin.Common.dll  /r:Owin.Handlers.Kayak.dll
+./RunKayakApp.exe
