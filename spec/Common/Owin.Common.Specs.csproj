@@ -51,6 +51,10 @@
       <Project>{163A0E93-A512-4B2F-AF1A-301804749EDE}</Project>
       <Name>Owin.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Test\Owin.Test.csproj">
+      <Project>{44491701-BDD3-4E5A-96F1-C319C3973641}</Project>
+      <Name>Owin.Test</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
