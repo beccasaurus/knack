@@ -27,7 +27,10 @@ namespace Owin.Common.Middleware.Specs {
 
 		[SetUp]
 		public void Before() {
-		    App = new Builder().Use(new Lint(), new ShowExceptions()).Run(new LintApp()).ToApp();
+		    App = new Builder().
+				    Use(new ShowExceptions()).
+				    Use(new Lint()).
+				    Run(new LintApp()).ToApp();
 		}
 
 		[Test]

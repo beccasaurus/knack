@@ -6,12 +6,6 @@ using System.Collections.Specialized;
 using Owin;
 using NUnit.Framework;
 
-// TODO write example to make sure that both the constructor and Use/Run syntax make it visually obvious
-//      where the middleware are placed in the 'stack'
-//
-//      new Builder(app, innermost, next, outtermost)
-//      Builder().Use(outermost).Use(next).Use(innermost).Run(app)  <--- innermost should always be "next to" the app
-//
 namespace Owin.Common.Specs {
 
     [TestFixture]
@@ -84,9 +78,9 @@ namespace Owin.Common.Specs {
 	[Test]
 	public void Middleware_can_easily_be_configured_using_Owin_Builder_fluent_syntax() {
 	    IApplication app = new Builder().
-					    Use(new MiddlewareThatWrapsBody("InnerMost")).
+					    Use(new MiddlewareThatWrapsBody("OuterMost")). // when you use Use() and Run(), innermost is last, next to the App
 					    Use(new MiddlewareThatWrapsBody("Middle")).
-					    Use(new MiddlewareThatWrapsBody("OuterMost")).
+					    Use(new MiddlewareThatWrapsBody("InnerMost")).
 					    Run(new TheApp()).
 					    ToApplication();
 

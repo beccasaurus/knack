@@ -21,8 +21,20 @@ namespace Owin {
 	    Middlewares.AddRange(middlewares);
 	}
 
+	// When you Use() middleware, you want the LAST middleware to be CLOSEST to the application
+	//
+	//  new Builder().
+	//  	Use(OUTER).
+	//  	Use(INNER).
+	//  	Run(APP).ToApp()
+	//
+	// We store the middleware stack with the innermost first.
+	//
+	// So when you Use() a middleware, instead of adding it to the end, we "unshift" it to the top
+	//
 	public Builder Use(params IMiddleware[] middlewares) {
-	    Middlewares.AddRange(middlewares);
+	    foreach (IMiddleware middleware in middlewares)
+		Middlewares.Insert(0, middleware);
 	    return this;
 	}
 
@@ -49,7 +61,7 @@ namespace Owin {
 	}
 	
 	public static IApplication Build(IApplication theApp, params IMiddleware[] middlewares) {
-	    return new Builder(theApp).Use(middlewares).ToApplication();
+	    return new Builder(theApp, middlewares).ToApplication();
 	}
     }
 }
