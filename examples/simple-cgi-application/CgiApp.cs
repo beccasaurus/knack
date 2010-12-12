@@ -28,6 +28,9 @@ public class CgiApp : Application, IApplication {
 
 public class Program {
 	public static void Main(string[] args) {
-		Owin.Handlers.Cgi.Run(new CgiApp());
+		if (args.Length > 0 && args[0] == "kayak")
+		    Owin.Handlers.Kayak.Run(new CgiApp());
+		else
+		    Owin.Handlers.Cgi.Run(new CgiApp());
 	}
 }
