@@ -202,7 +202,8 @@ namespace Owin {
 
                 NameValueCollection postVariables = HttpUtility.ParseQueryString(Body);
                 foreach (string key in postVariables)
-                    post.Add(key, postVariables[key]);
+		    if (key != null)
+			post.Add(key, postVariables[key]);
                 return post;
             }
         }

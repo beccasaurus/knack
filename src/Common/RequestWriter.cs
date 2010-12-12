@@ -22,30 +22,32 @@ namespace Owin {
             SetValidDefaults();
         }
 
-        public RequestWriter(string uri)
-            : this() {
+        public RequestWriter(string uri) : this() {
             Uri = uri;
         }
 
-        public RequestWriter(string method, string uri)
-            : this() {
+        public RequestWriter(string method, string uri) : this() {
             Method = method;
             Uri = uri;
         }
 
-        public RequestWriter(string method, string uri, string body)
-            : this() {
+        public RequestWriter(string method, string uri, string body) : this() {
             Method = method;
             Uri = uri;
             TheRealBody = body;
         }
 
-        public RequestWriter(string method, string uri, byte[] body)
-            : this() {
+        public RequestWriter(string method, string uri, byte[] body) : this() {
             Method = method;
             Uri = uri;
             TheRealBodyBytes = body;
         }
+
+	public RequestWriter(IRequest rawRequest) : this() {
+	    Method = rawRequest.Method;
+	    Uri = rawRequest.Uri;
+	    TheRealBodyBytes = new Request(rawRequest).BodyBytes;
+	}
         #endregion
 
         #region Method
@@ -68,6 +70,16 @@ namespace Owin {
 
         #region Headers
         public new IDictionary<string, IEnumerable<string>> Headers { get; set; }
+
+	public RequestWriter SetContentType(string type) {
+	    ContentType = type;
+	    return this;
+	}
+
+        public string ContentType {
+            get { return GetHeader("content-type"); }
+            set { SetHeader("content-type", value); }
+        }
 
         /// <summary>Set header with a string, overriding any other values this header may have</summary>
         public RequestWriter SetHeader(string key, string value) {
@@ -104,12 +116,6 @@ namespace Owin {
                 SetHeader(key, value);
             return this;
         }
-
-        // TODO test
-        // public string ContentType {
-        //     get { return HeaderOrNull("content-type"); }
-        //     set { SetHeader("content-type", value); }
-        // }
         #endregion
 
         #region Items
@@ -132,6 +138,10 @@ namespace Owin {
             TheRealBody = body;
             return this;
         }
+
+	public RequestWriter SetBody(IDictionary<string,string> postData) {
+	    return SetBody(Owin.Util.ToQueryString(postData));
+	}
 
         public RequestWriter SetBody(byte[] body) {
             TheRealBodyBytes = body;
