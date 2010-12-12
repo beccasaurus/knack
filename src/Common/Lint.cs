@@ -10,7 +10,14 @@ namespace Owin {
         public LintException(string message) : base(message) { }
     }
 
-    public class Lint {
+    public class Lint : Application, IApplication, IMiddleware {
+
+	public override IResponse Call(IRequest request) {
+	    Lint.Validate(request);
+	    IResponse response = Application.Invoke(InnerApplication, request);
+	    Lint.Validate(response);
+	    return response;
+	}
 
         static readonly List<string> RequestItemsThatCannotBeNull = new List<string> { "owin.base_path", "owin.server_name", "owin.server_port", "owin.request_protocol", "owin.remote_endpoint" };
         static readonly List<string> RequestItemsThatCannotBeBlank = new List<string> { "owin.server_name", "owin.server_port", "owin.request_protocol" };

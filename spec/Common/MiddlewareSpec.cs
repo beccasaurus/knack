@@ -6,6 +6,12 @@ using System.Collections.Specialized;
 using Owin;
 using NUnit.Framework;
 
+// TODO write example to make sure that both the constructor and Use/Run syntax make it visually obvious
+//      where the middleware are placed in the 'stack'
+//
+//      new Builder(app, innermost, next, outtermost)
+//      Builder().Use(outermost).Use(next).Use(innermost).Run(app)  <--- innermost should always be "next to" the app
+//
 namespace Owin.Common.Specs {
 
     [TestFixture]

@@ -60,7 +60,7 @@ namespace Owin.Common.Specs {
 
         [Test]
         [ExpectedException(typeof(LintException), ExpectedMessage = "Request was not valid: Method cannot be null, Uri cannot be null")]
-        public void Can_raise_exception_with_many_messaegs_if_validation_fails() {
+        public void Can_raise_exception_with_many_messages_if_validation_fails() {
             request = new Req { Method = null, Uri = null };
             Owin.Lint.Validate(request);
         }
