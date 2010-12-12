@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Common.Specs", "spec\C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Handlers.Kayak", "src\Handlers\Kayak\Owin.Handlers.Kayak.csproj", "{A9655B65-88EB-435E-AA21-2F38879F2A75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Handlers.Cgi", "src\Handlers\Cgi\Owin.Handlers.Cgi.csproj", "{07E85934-3766-4235-A0C9-9B94CD3857D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Handlers.Cgi.Specs", "spec\Handlers\Cgi\Owin.Handlers.Cgi.Specs.csproj", "{511536C9-BCB6-49E2-8855-F23A5CF4A34F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +29,14 @@ Global
 		{A9655B65-88EB-435E-AA21-2F38879F2A75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9655B65-88EB-435E-AA21-2F38879F2A75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9655B65-88EB-435E-AA21-2F38879F2A75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07E85934-3766-4235-A0C9-9B94CD3857D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07E85934-3766-4235-A0C9-9B94CD3857D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07E85934-3766-4235-A0C9-9B94CD3857D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07E85934-3766-4235-A0C9-9B94CD3857D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{511536C9-BCB6-49E2-8855-F23A5CF4A34F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{511536C9-BCB6-49E2-8855-F23A5CF4A34F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{511536C9-BCB6-49E2-8855-F23A5CF4A34F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{511536C9-BCB6-49E2-8855-F23A5CF4A34F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
