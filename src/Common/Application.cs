@@ -11,39 +11,39 @@ namespace Owin {
 
     public class Application : IApplication, IMiddleware {
 
-        public Application() {}
+        public Application() { }
 
         public Application(IApplication innerApplication) {
-	    InnerApplication = innerApplication;
-	}
+            InnerApplication = innerApplication;
+        }
 
         public Application(IApplication innerApplication, ApplicationResponder responder) {
-	    InnerApplication = innerApplication;
-            Responder        = responder;
+            InnerApplication = innerApplication;
+            Responder = responder;
         }
 
         public Application(ApplicationResponder responder) {
             Responder = responder;
         }
 
-	public IApplication InnerApplication { get; set; }
+        public IApplication InnerApplication { get; set; }
 
-	/// <summary>If you override Call in your Application subclass, it will be used for invoking your application if Responder is not set</summary>
+        /// <summary>If you override Call in your Application subclass, it will be used for invoking your application if Responder is not set</summary>
         public virtual IResponse Call(IRequest request) {
             throw new NotImplementedException("You need to override Call in your Application subclass or set Application.Responder.");
         }
 
-	ApplicationResponder _responder;
+        ApplicationResponder _responder;
 
-	/// <summary>The delegate use to actually invoke your application.  If not set manually, the Call method is used.</summary>
+        /// <summary>The delegate use to actually invoke your application.  If not set manually, the Call method is used.</summary>
         public ApplicationResponder Responder {
-	    get {
-		if (_responder == null)
-		    _responder = new ApplicationResponder(Call);
-		return _responder;
-	    }
-	    set { _responder = value; }
-	}
+            get {
+                if (_responder == null)
+                    _responder = new ApplicationResponder(Call);
+                return _responder;
+            }
+            set { _responder = value; }
+        }
 
         public IAsyncResult BeginInvoke(IRequest request, AsyncCallback callback, object state) {
             return Responder.BeginInvoke(request, callback, state);

@@ -65,36 +65,36 @@ namespace Owin {
         public virtual int EndReadBody(IAsyncResult result) { return InnerRequest.EndReadBody(result); }
         #endregion
 
-        public string BasePath {
+        public virtual string BasePath {
             get { return InnerRequest.Items["owin.base_path"].ToString(); }
         }
 
-        public string Scheme {
+        public virtual string Scheme {
             get { return InnerRequest.Items["owin.url_scheme"].ToString(); }
         }
 
-        public string Host {
+        public virtual string Host {
             get { return StringItemOrNull("owin.server_name"); } // TODO return Host: header if definted?
         }
 
-        public int Port {
+        public virtual int Port {
             get {
                 string port = StringItemOrNull("owin.server_port");
                 return (port == null) ? 0 : int.Parse(port);
             }
         }
 
-	public string Protocol {
-	    get { return StringItemOrNull("owin.request_protocol"); }
-	}
+        public virtual string Protocol {
+            get { return StringItemOrNull("owin.request_protocol"); }
+        }
 
-	public IPEndPoint IPEndPoint {
-	    get { return Items["owin.remote_endpoint"] as IPEndPoint; }
-	}
+        public virtual IPEndPoint IPEndPoint {
+            get { return Items["owin.remote_endpoint"] as IPEndPoint; }
+        }
 
-	public IPAddress IPAddress {
-	    get { return IPEndPoint.Address; }
-	}
+        public virtual IPAddress IPAddress {
+            get { return IPEndPoint.Address; }
+        }
 
         public virtual string Url {
             get {
@@ -109,20 +109,20 @@ namespace Owin {
             }
         }
 
-	/// <summary>Returns the first value of the given header or null if the header does not exist</summary>
-	public virtual string GetHeader(string key) {
-	    key = key.ToLower(); // <--- instead of doing this everywhere, it would be ideal if the Headers IDictionary could do this by itself!
-	    if (! Headers.ContainsKey(key))
-		return null;
-	    else {
-		string value = null;
-		foreach (string headerValue in Headers[key]) {
-		    value = headerValue;
-		    break;   
-		}
-		return value;
-	    }
-	}
+        /// <summary>Returns the first value of the given header or null if the header does not exist</summary>
+        public virtual string GetHeader(string key) {
+            key = key.ToLower(); // <--- instead of doing this everywhere, it would be ideal if the Headers IDictionary could do this by itself!
+            if (!Headers.ContainsKey(key))
+                return null;
+            else {
+                string value = null;
+                foreach (string headerValue in Headers[key]) {
+                    value = headerValue;
+                    break;
+                }
+                return value;
+            }
+        }
 
         public virtual string ContentType {
             get { return GetHeader("content-type"); }
@@ -139,11 +139,11 @@ namespace Owin {
             }
         }
 
-        public bool IsGet { get { return Method.ToUpper() == "GET"; } }
-        public bool IsPost { get { return Method.ToUpper() == "POST"; } }
-        public bool IsPut { get { return Method.ToUpper() == "PUT"; } }
-        public bool IsDelete { get { return Method.ToUpper() == "DELETE"; } }
-        public bool IsHead { get { return Method.ToUpper() == "HEAD"; } }
+        public virtual bool IsGet { get { return Method.ToUpper() == "GET"; } }
+        public virtual bool IsPost { get { return Method.ToUpper() == "POST"; } }
+        public virtual bool IsPut { get { return Method.ToUpper() == "PUT"; } }
+        public virtual bool IsDelete { get { return Method.ToUpper() == "DELETE"; } }
+        public virtual bool IsHead { get { return Method.ToUpper() == "HEAD"; } }
 
         /// <summary>Get the raw value of the QueryString</summary>
         /// <remarks>
@@ -152,29 +152,29 @@ namespace Owin {
         /// This grabs the QueryString from the Uri unless the server provides 
         /// us with a QUERY_STRING.
         /// </remarks>
-        public string QueryString {
+        public virtual string QueryString {
             get { return new Uri(Url).Query.Replace("?", ""); }
         }
 
-	// alias to Params
-	public string this[string key] {
-	    get { return Params[key]; }
-	}
+        // alias to Params
+        public virtual string this[string key] {
+            get { return Params[key]; }
+        }
 
-	public IDictionary<string,string> Params {
-	    get {
-		Dictionary<string,string> getAndPost = new ParamsDictionary<string,string>();
-		foreach (KeyValuePair<string,string> item in GET)
-		    getAndPost.Add(item.Key, item.Value);
-		foreach (KeyValuePair<string,string> item in POST)
-		    getAndPost.Add(item.Key, item.Value);
-		return getAndPost;
-	    }
-	}
-
-        public IDictionary<string,string> GET {
+        public virtual IDictionary<string, string> Params {
             get {
-                IDictionary<string,string> get = new ParamsDictionary<string,string>();
+                Dictionary<string, string> getAndPost = new ParamsDictionary<string, string>();
+                foreach (KeyValuePair<string, string> item in GET)
+                    getAndPost.Add(item.Key, item.Value);
+                foreach (KeyValuePair<string, string> item in POST)
+                    getAndPost.Add(item.Key, item.Value);
+                return getAndPost;
+            }
+        }
+
+        public virtual IDictionary<string, string> GET {
+            get {
+                IDictionary<string, string> get = new ParamsDictionary<string, string>();
                 NameValueCollection queryStrings = HttpUtility.ParseQueryString(QueryString);
                 foreach (string key in queryStrings)
                     get.Add(key, queryStrings[key]);
@@ -182,9 +182,9 @@ namespace Owin {
             }
         }
 
-        public IDictionary<string,string> POST {
+        public virtual IDictionary<string, string> POST {
             get {
-                IDictionary<string,string> post = new ParamsDictionary<string,string>();
+                IDictionary<string, string> post = new ParamsDictionary<string, string>();
                 if (!HasFormData) return post;
 
                 NameValueCollection postVariables = HttpUtility.ParseQueryString(Body);
@@ -195,20 +195,20 @@ namespace Owin {
         }
 
         // blocks while it gets the full body
-        public string Body {
+        public virtual string Body {
             get { return Encoding.UTF8.GetString(BodyBytes); } // TODO should be able to change the encoding used (?)
         }
 
         // blocks while it gets the full body
-        public byte[] BodyBytes {
+        public virtual byte[] BodyBytes {
             get { return GetAllBodyBytes(); }
         }
 
-        public byte[] GetAllBodyBytes() {
+        public virtual byte[] GetAllBodyBytes() {
             return GetAllBodyBytes(1000); // how many bytes to get per call to BeginReadBody
         }
 
-        public byte[] GetAllBodyBytes(int batchSize) {
+        public virtual byte[] GetAllBodyBytes(int batchSize) {
             List<byte> allBytes = new List<byte>();
             bool done = false;
             int offset = 0;

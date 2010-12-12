@@ -38,11 +38,14 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AspNet.cs" />
+    <Compile Include="AspNetApplication.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="AspNetRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

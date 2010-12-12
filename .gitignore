@@ -6,4 +6,7 @@ TestResult.xml
 examples/**/*.dll
 examples/**/*.exe
 examples/**/*.cgi
+examples/**/*/*.dll
+examples/**/*/*.exe
+examples/**/*/*.cgi
 output
