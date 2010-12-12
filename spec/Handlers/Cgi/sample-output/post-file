@@ -42,3 +42,58 @@ It's an awesome file, ain't it?
 
 remi@meerkat:~$ 
 
+
+---------------
+
+
+Example with 2 files uploaded:
+
+t:~/Desktop/Cgi-testing$ curl -i -F file=@/home/remi/example-file -F file2=@/home/remi/example-file2 http://localhost:3000/cgi-runner.cgi/hi/there?this=that
+HTTP/1.1 200 OK 
+Connection: Keep-Alive
+Content-Type: text/plain
+Date: Sun, 12 Dec 2010 04:37:23 GMT
+Server: WEBrick/1.3.1 (Ruby/1.8.7/2010-06-23)
+Content-Length: 1333
+Status: HTTP/1.1 200 OK
+
+[REMOTE_HOST] = [localhost.localdomain]
+[HTTP_EXPECT] = [100-continue]
+[QUERY_STRING] = [this=that]
+[SCRIPT_NAME] = [/cgi-runner.cgi]
+[_] = [./Testing.exe]
+[REQUEST_METHOD] = [POST]
+[REQUEST_URI] = [http://localhost:3000/cgi-runner.cgi/hi/there?this=that]
+[SERVER_NAME] = [localhost]
+[SERVER_PORT] = [3000]
+[HTTP_USER_AGENT] = [curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18]
+[REMOTE_ADDR] = [127.0.0.1]
+[PWD] = [/home/remi/Desktop/Cgi-testing]
+[CONTENT_LENGTH] = [440]
+[HTTP_HOST] = [localhost:3000]
+[GATEWAY_INTERFACE] = [CGI/1.1]
+[PATH_INFO] = [/hi/there]
+[SERVER_SOFTWARE] = [WEBrick/1.3.1 (Ruby/1.8.7/2010-06-23)]
+[CONTENT_TYPE] = [multipart/form-data; boundary=----------------------------a0da6df1e140]
+[SERVER_PROTOCOL] = [HTTP/1.1]
+[SCRIPT_FILENAME] = [/home/remi/Desktop/Cgi-testing/cgi-runner.cgi]
+[HTTP_ACCEPT] = [*/*]
+[SHLVL] = [1]
+
+STDIN: ------------------------------a0da6df1e140
+Content-Disposition: form-data; name="file"; filename="example-file"
+Content-Type: application/octet-stream
+
+This is the content of my file
+
+It's an awesome file, ain't it?
+
+------------------------------a0da6df1e140
+Content-Disposition: form-data; name="file2"; filename="example-file2"
+Content-Type: application/octet-stream
+
+second file
+
+------------------------------a0da6df1e140--
+
+remi@meerkat:~/Desktop/Cgi-testing$ 

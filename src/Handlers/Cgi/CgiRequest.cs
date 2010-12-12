@@ -9,13 +9,16 @@ namespace Owin.Handlers {
     // might nest this underneath Cgi, so it's Owin.Handlers.Cgi.CgiRequest ...
     public class CgiRequest : RequestWriter, IRequest {
 
-	IDictionary<string,string> ENV { get; set; }
+	IDictionary<string,string> ENV = new Dictionary<string,string>();
 
-	public CgiRequest(IDictionary environmentVariables) {
-	    ENV = new Dictionary<string,string>();
+	public CgiRequest(IDictionary environmentVariables) : this(environmentVariables, null) {}
+
+	public CgiRequest(IDictionary environmentVariables, string requestBody) {
+	    if (requestBody != null)
+		SetBody(requestBody);
+
 	    foreach (DictionaryEntry entry in environmentVariables)
 		ENV[entry.Key.ToString()] = entry.Value.ToString();
-
 	    SetItemsFromENV();
 	    ImportHeadersFromENV();
 	}

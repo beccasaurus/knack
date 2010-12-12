@@ -194,7 +194,36 @@ namespace Owin.Handlers.Specs {
 
 	[TestFixture]
 	public class Body : CgiRequestSpec {
+	    
+	    [Test]
+	    public void Can_initialize_CgiRequest_with_body_content() {
+		request = new CgiRequest(ENV_Simple, "hi");
+		Assert.That(request.Body, Is.EqualTo("hi"));
+	    }
 
+	    [Test]
+	    public void Can_get_and_set_body() {
+		request = new CgiRequest(ENV_Simple);
+		request.SetBody("hello world!");
+
+		Assert.That(request.Body, Is.EqualTo("hello world!"));
+	    }
+
+	    [Test]
+	    public void x_www_form_urlencoded_POST_variables_are_parsed_properly() {
+		request = new CgiRequest(GetEnvironmentVariables(new Dictionary<string,string>{
+				{"REQUEST_METHOD","POST"},
+				{"CONTENT_TYPE","application/x-www-form-urlencoded"}
+				}), "name=Rover&breed=GoldenRetriever");
+
+		Assert.That(request.POST["name"],          Is.EqualTo("Rover"));
+		Assert.That(request.POST["breed"],         Is.EqualTo("GoldenRetriever"));
+		Assert.That(request.POST["didntPostThis"], Is.Null);
+	    }
+
+	    [Test][Ignore]
+	    public void multipart_formdata_POST_variables_are_parsed_properly() {
+	    }
 	}
     }
 }
