@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Handlers.Cgi", "src\Ha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Handlers.Cgi.Specs", "spec\Handlers\Cgi\Owin.Handlers.Cgi.Specs.csproj", "{511536C9-BCB6-49E2-8855-F23A5CF4A34F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Handlers.AspNet", "src\Handlers\AspNet\Owin.Handlers.AspNet.csproj", "{8EF793AF-AD17-49D3-8884-A8AFEC75641D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.Handlers.AspNet.Specs", "spec\Handlers\AspNet\Owin.Handlers.AspNet.Specs.csproj", "{F5EE0303-5943-48ED-A61E-3274D8A21214}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,14 @@ Global
 		{511536C9-BCB6-49E2-8855-F23A5CF4A34F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{511536C9-BCB6-49E2-8855-F23A5CF4A34F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{511536C9-BCB6-49E2-8855-F23A5CF4A34F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EF793AF-AD17-49D3-8884-A8AFEC75641D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EF793AF-AD17-49D3-8884-A8AFEC75641D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EF793AF-AD17-49D3-8884-A8AFEC75641D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EF793AF-AD17-49D3-8884-A8AFEC75641D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5EE0303-5943-48ED-A61E-3274D8A21214}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5EE0303-5943-48ED-A61E-3274D8A21214}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5EE0303-5943-48ED-A61E-3274D8A21214}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5EE0303-5943-48ED-A61E-3274D8A21214}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
