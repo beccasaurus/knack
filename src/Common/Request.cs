@@ -96,6 +96,19 @@ namespace Owin {
             get { return IPEndPoint.Address; }
         }
 
+	public virtual string PathInfo {
+	    get {
+		if (Uri.Contains("?"))
+		    return Uri.Substring(0, Uri.IndexOf("?")); // grab everything before a ?
+		else
+		    return Uri;
+	    }
+	}
+
+	public virtual string Path {
+	    get { return BasePath + PathInfo; }
+	}
+
         public virtual string Url {
             get {
                 string url = Scheme + "://" + Host;

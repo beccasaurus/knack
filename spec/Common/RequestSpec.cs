@@ -7,6 +7,11 @@ using Owin;
 using NUnit.Framework;
 
 // TODO omg, we need to refactor this spec, it's bad!  they should be more like the Lint specs, each of them with a request.  they should also validate each request!
+//
+// This was the first spec we write for Owin.Common and we hadn't come up with any clean patterns yet.
+//
+// We'll clean this spec up asap ...
+//
 namespace Owin.Common.Specs {
 
     // *Simple* struct-like IRequest implementation for RequestSpec
@@ -111,6 +116,23 @@ namespace Owin.Common.Specs {
             request.Items["owin.url_scheme"] = "http";
             Assert.That(R(request).Url, Is.EqualTo("http://code.com:123/my/root/neat"));
         }
+
+	[Test]
+	public void Can_get_the_path_info_which_is_the_Uri_without_querystrings() {
+	    Req request = new Req { Uri = "/foo/bar?hello=there" };
+	    request.Items["owin.base_path"] = "/foo.cgi/";
+	    Assert.That(R(request).PathInfo, Is.EqualTo("/foo/bar"));
+	}
+
+	[Test]
+	public void Can_get_the_path_which_includes_the_base_name_and_path_without_querystrings( ){
+	    Req request = new Req { Uri = "/foo/bar?hello=there" };
+	    Assert.That(R(request).Path, Is.EqualTo("/foo/bar"));
+
+	    // includes base path
+	    request.Items["owin.base_path"] = "/foo.cgi";
+	    Assert.That(R(request).Path, Is.EqualTo("/foo.cgi/foo/bar"));
+	}
 
         [Test]
         public void Can_get_the_raw_QueryString_from_Uri() {
