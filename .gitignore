@@ -10,3 +10,4 @@ examples/**/*/*.dll
 examples/**/*/*.exe
 examples/**/*/*.cgi
 output
+README.html
