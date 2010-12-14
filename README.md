@@ -1,3 +1,7 @@
+# Owin.Common is currently undergoing renaming
+
+Please stay tuned.
+
 Owin.Common
 ===========
 
