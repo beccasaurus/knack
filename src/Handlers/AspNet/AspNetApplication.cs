@@ -5,20 +5,20 @@ using Owin.Handlers;
 
 namespace Owin {
 
-    // This is an IApplication *and* an IHttpHandler, so you can use it with ASP.NET applications
-    //
-    // We plan on implementing the Async HttpHandler, which fits really well with the IApplication interface
-    //
-    public class AspNetApplication : Application, IApplication, IMiddleware, IHttpHandler {
+	// This is an IApplication *and* an IHttpHandler, so you can use it with ASP.NET applications
+	//
+	// We plan on implementing the Async HttpHandler, which fits really well with the IApplication interface
+	//
+	public class AspNetApplication : Application, IApplication, IMiddleware, IHttpHandler {
 
-        public void ProcessRequest(HttpContext context) {
-            IRequest  request  = new AspNetRequest(context.Request);
-            IResponse response = Invoke(request);
-            AspNet.WriteResponse(context.Response, response);
-        }
+		public void ProcessRequest(HttpContext context) {
+			IRequest  request  = new AspNetRequest(context.Request);
+			IResponse response = Invoke(request);
+			AspNet.WriteResponse(context.Response, response);
+		}
 
-        public bool IsReusable {
-            get { return true; }
-        }
-    }
+		public bool IsReusable {
+			get { return true; }
+		}
+	}
 }
